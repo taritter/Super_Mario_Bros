@@ -1,0 +1,48 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "demo_background.tmx",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "1-1_tileset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "demo_background.tmx": {
+            "scale": 1.2428,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 153.68522690698424,
+                "y": 142.01802381718701
+            }
+        }
+    },
+    "last.exportedFilePath": "/Users/nathanblanchard/Library/CloudStorage/OneDrive-UniversityofVermont/CS3050/Final Project/Backgrounds",
+    "last.externalTilesetPath": "/Users/nathanblanchard/Library/CloudStorage/OneDrive-UniversityofVermont/CS3050/Final Project/Backgrounds",
+    "last.imagePath": "/Users/nathanblanchard/Library/CloudStorage/OneDrive-UniversityofVermont/CS3050/Final Project/Backgrounds",
+    "map.height": 15,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 16,
+    "openFiles": [
+        "demo_background.tmx",
+        "1-1_tileset.tsx"
+    ],
+    "project": "demo_background.tiled-project",
+    "recentFiles": [
+        "demo_background.tmx",
+        "1-1_tileset.tsx"
+    ],
+    "tileset.lastUsedFilter": "Tiled tileset files (*.tsx *.xml)",
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
