@@ -155,6 +155,11 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
         """Movement and game logic"""
+        if self.player_sprite.center_x < 0:
+            self.player_sprite.center_x = 0
+        if self.player_sprite.center_x > SCREEN_WIDTH:
+            self.player_sprite.center_x = SCREEN_WIDTH
+
 
         # Move the player with the physics engine
         self.physics_engine.update()
