@@ -6,19 +6,19 @@ import arcade
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
-SCREEN_WIDTH = 256
-SCREEN_HEIGHT = 240
+SCREEN_WIDTH = 640
+SCREEN_HEIGHT = 600
 
 # Constants used to scale our sprites from their original size
-CHARACTER_SCALING = 1
-TILE_SCALING = 1
+CHARACTER_SCALING = 2.5
+TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 
 # Movement speed of player, in pixels per frame
-PLAYER_MOVEMENT_SPEED = 3
-GRAVITY = 1
-PLAYER_JUMP_SPEED = 15
+PLAYER_MOVEMENT_SPEED = 5
+GRAVITY = 0.8
+PLAYER_JUMP_SPEED = 18
 
 
 class MyGame(arcade.Window):
@@ -58,8 +58,8 @@ class MyGame(arcade.Window):
         # Set up the player, specifically placing it at these coordinates.
         src = "resources/demo_sprite.png"
         self.player_sprite = arcade.Sprite(src, CHARACTER_SCALING)
-        self.player_sprite.center_x = 16
-        self.player_sprite.center_y = 16
+        self.player_sprite.center_x = 48
+        self.player_sprite.center_y = 48
         self.player_list.append(self.player_sprite)
 
         # Name of map file to load
@@ -108,9 +108,16 @@ class MyGame(arcade.Window):
         # Draw our Scene
         # Note, if you a want pixelated look, add pixelated=True to the parameters
 
-        self.background_list.draw()
-        self.player_list.draw()
-        self.wall_list.draw()
+        # Calculate the drawing position for the background sprite
+        background_draw_x = 128 * TILE_SCALING
+        background_draw_y = 120 * TILE_SCALING # Align top of sprite with top of screen
+
+        # Set the position of the background sprite before drawing
+        self.background_list[0].set_position(background_draw_x, background_draw_y)
+
+        self.background_list.draw(pixelated=True)
+        self.player_list.draw(pixelated=True)
+        self.wall_list.draw(pixelated=True)
         
 
         #self.scene.draw()
