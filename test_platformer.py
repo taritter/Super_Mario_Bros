@@ -49,6 +49,10 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
+        self.coins = 0
+
+        self.level = 1
+
 
         # What key is pressed down?
         self.left_key_down = False
