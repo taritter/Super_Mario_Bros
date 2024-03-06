@@ -167,6 +167,7 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
         """Movement and game logic"""
+        # At some later point, can replace SCREEN_WIDTH with self.width
         if self.mario.center_x < 0:
             self.mario.center_x = 0
         elif self.mario.center_x > SCREEN_WIDTH:
