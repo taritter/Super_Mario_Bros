@@ -3,7 +3,7 @@ Platformer Template
 """
 import arcade
 import launch
-
+from mario import Mario
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
