@@ -2,8 +2,6 @@ import arcade
 import test_platformer as main
 
 SCREEN_TITLE = "Launch"
-SCREEN_WIDTH = 700
-SCREEN_HEIGHT = 700
 
 class Title_Screen(arcade.View):
     def __init__(self):
