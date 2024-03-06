@@ -2,12 +2,13 @@
 Platformer Template
 """
 import arcade
+import launch
 
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
-SCREEN_WIDTH = 256
-SCREEN_HEIGHT = 240
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 700
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 1
@@ -44,10 +45,20 @@ class MyGame(arcade.Window):
         # Our physics engine
         self.physics_engine = None
 
+        self.background_list = []
+
+        self.player_list = []
+
 
         # What key is pressed down?
         self.left_key_down = False
         self.right_key_down = False
+
+        # Mouse visibility
+        self.set_mouse_visible(False)
+
+        # background color
+        arcade.set_background_color(arcade.color.BLACK)
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -162,9 +173,11 @@ class MyGame(arcade.Window):
 
 def main():
     """Main function"""
-    window = MyGame()
-    window.setup()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = launch.Title_Screen()
+    window.show_view(start_view)
     arcade.run()
+    arcade.close_window()
 
 
 if __name__ == "__main__":
