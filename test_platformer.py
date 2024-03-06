@@ -169,7 +169,7 @@ class MyGame(arcade.Window):
         """Movement and game logic"""
         if self.mario.center_x < 0:
             self.mario.center_x = 0
-        elif self.mario.center_x > SCREEN_WIDTH:
+        if self.mario.center_x > SCREEN_WIDTH:
             self.mario.center_x = SCREEN_WIDTH
 
 
