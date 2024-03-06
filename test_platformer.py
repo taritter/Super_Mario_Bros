@@ -156,6 +156,11 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
         """Movement and game logic"""
+        if self.player_sprite.center_x < 0:
+            self.player_sprite.center_x = 0
+        if self.player_sprite.center_x > SCREEN_WIDTH:
+            self.player_sprite.center_x = SCREEN_WIDTH
+
 
         # Player movement and physics engine
         self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
