@@ -2,6 +2,7 @@
 Platformer Template
 """
 import arcade
+from mario import Mario
 
 # --- Constants
 SCREEN_TITLE = "Platformer"
@@ -15,32 +16,8 @@ TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 
-# Constants used to track if the player is facing left or right
-RIGHT_FACING = 0
-LEFT_FACING = 1
-
-# Constants used to track if the player is sprinting
-WALKING = 0
-SPRINTING = 1
-
-# Constants to check if the player is sliding
-NOT_SLIDING = 0
-SLIDING = 1
-
-# Constants to track if the player is small or large
-SMALL = 0
-LARGE = 1
-
-# Constants to track if the player has the fire powerup
-POWERUP = 0
-POWERUP = 1
-
-# Movement speed of player, in pixels per frame
-PLAYER_MOVEMENT_SPEED = 4
-PLAYER_SPRINT_SPEED = 8
-PLAYER_ACCELERATION = 0.5
+# The gravity that is used by the physics engine
 GRAVITY = 0.8
-PLAYER_JUMP_SPEED = 18
 
 PLAYER_START_X = SPRITE_PIXEL_SIZE * CHARACTER_SCALING * 2
 PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
@@ -48,110 +25,6 @@ PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
 LAYER_NAME_PLATFORMS = "Platforms"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
-
-def load_texture_pair(filename):
-    """
-    Load a texture pair, with the second being a mirror image.
-    """
-    return [
-        arcade.load_texture(filename),
-        arcade.load_texture(filename, flipped_horizontally=True),
-    ]
-
-class PlayerCharacter(arcade.Sprite):
-    """Player Sprite"""
-
-    def __init__(self):
-
-        # Set up parent class
-        super().__init__()
-
-        # Default to face-right
-        self.character_face_direction = RIGHT_FACING
-
-        # Used for flipping between image sequences
-        self.cur_texture = 0
-        self.scale = CHARACTER_SCALING
-
-        # Track our state
-        self.jumping = False
-        self.sprinting = WALKING
-        self.sliding = NOT_SLIDING
-
-        # --- Load Textures ---
-
-        # Images from Kenney.nl's Asset Pack 3
-        main_path = "resources/sprites/"
-
-        # Load textures for idle standing
-        self.small_idle_texture_pair = load_texture_pair(f"{main_path}mario_small_idle.png")
-
-        # Load textures for jumping
-        self.small_jump_texture_pair = load_texture_pair(f"{main_path}mario_small_jump.png")
-
-        # Load textures for sliding
-        self.small_slide_texture_pair = load_texture_pair(f"{main_path}mario_small_slide.png")
-
-        # Load textures for walking
-        self.walk_textures = []
-        for i in range(1, 4):
-            texture = load_texture_pair(f"{main_path}mario_small_walk_{i}.png")
-            self.walk_textures.append(texture)
-
-        # Set the initial texture
-        self.texture = self.small_idle_texture_pair[0]
-
-        # Hit box will be set based on the first image used. If you want to specify
-        # a different hit box, you can do it like the code below.
-        # set_hit_box = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
-        self.hit_box = self.texture.hit_box_points
-
-        self.update_counter = 0
-
-    def update_animation(self, delta_time: float = 1 / 60):
-
-        # Figure out if we need to flip face left or right
-        # Only change if the player is touching the ground
-        if self.change_y == 0:
-            if self.change_x < 0 and self.character_face_direction == RIGHT_FACING:
-                self.character_face_direction = LEFT_FACING
-            elif self.change_x > 0 and self.character_face_direction == LEFT_FACING:
-                self.character_face_direction = RIGHT_FACING
-
-        # Jumping animation
-        if self.change_y != 0:
-            self.texture = self.small_jump_texture_pair[self.character_face_direction]
-            return
-
-        # Idle animation
-        if self.change_x == 0:
-            self.texture = self.small_idle_texture_pair[self.character_face_direction]
-            return
-
-        if self.sliding == SLIDING:
-            self.texture = self.small_slide_texture_pair[self.character_face_direction]
-            return
-
-        # Walking and sprinting animation
-        if self.sprinting:
-            if self.update_counter >= 3:
-                self.cur_texture += 1
-                if self.cur_texture > 2:
-                    self.cur_texture = 0
-                self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
-                self.update_counter = 0
-        else:
-            if self.update_counter >= 5:
-                self.cur_texture += 1
-                if self.cur_texture > 2:
-                    self.cur_texture = 0
-                self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
-                self.update_counter = 0
-        
-        # Update our counter
-        self.update_counter += 1
-
-
 
 class MyGame(arcade.Window):
     """
@@ -171,7 +44,7 @@ class MyGame(arcade.Window):
         self.scene = None
 
         # Separate variable that holds the player sprite
-        self.player_sprite = None
+        self.mario = None
 
         # Our physics engine
         self.physics_engine = None
@@ -180,6 +53,7 @@ class MyGame(arcade.Window):
         # What key is pressed down?
         self.left_key_down = False
         self.right_key_down = False
+        self.jump_key_down = False
         self.sprint_key_down = False
 
     def setup(self):
@@ -216,16 +90,16 @@ class MyGame(arcade.Window):
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         # Set up the player, specifically placing it at these coordinates.
-        self.player_sprite = PlayerCharacter()
-        self.player_sprite.center_x = 48
-        self.player_sprite.center_y = 48
-        self.scene.add_sprite(LAYER_NAME_PLAYER, self.player_sprite)
+        self.mario = Mario(CHARACTER_SCALING)
+        self.mario.center_x = 48
+        self.mario.center_y = 48
+        self.scene.add_sprite(LAYER_NAME_PLAYER, self.mario)
 
         # --- Other stuff
         # Create the 'physics engine'
         walls = [self.wall_list, ]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, gravity_constant=GRAVITY, walls=walls
+            self.mario, gravity_constant=GRAVITY, walls=walls
         )
 
     def on_draw(self):
@@ -244,68 +118,7 @@ class MyGame(arcade.Window):
         # Set the position of the background sprite before drawing
         self.background_list[0].set_position(background_draw_x, background_draw_y)
 
-        #self.background_list.draw(pixelated=True)
-        #self.wall_list.draw(pixelated=True)
         self.scene.draw(pixelated=True)
-        
-
-        #self.scene.draw()
-
-
-    def update_player_speed(self):
-
-        # Calculate speed based on the keys pressed
-        if self.left_key_down and not self.right_key_down:
-            if self.player_sprite.change_x > 0:
-                self.player_sprite.sliding = SLIDING
-            else:
-                self.player_sprite.sliding = NOT_SLIDING
-            if self.sprint_key_down:
-                self.player_sprite.sprinting = SPRINTING
-                if self.player_sprite.change_x > -PLAYER_SPRINT_SPEED:
-                    self.player_sprite.change_x -= PLAYER_ACCELERATION
-                elif self.player_sprite.change_x < PLAYER_SPRINT_SPEED:
-                    self.player_sprite.change_x = -PLAYER_SPRINT_SPEED
-            else:
-                self.player_sprite.sprinting = WALKING
-                if self.player_sprite.change_x > -PLAYER_MOVEMENT_SPEED:
-                    self.player_sprite.change_x -= PLAYER_ACCELERATION
-                elif self.player_sprite.change_x < -PLAYER_MOVEMENT_SPEED:
-                    if self.player_sprite.change_x < -PLAYER_SPRINT_SPEED:
-                        self.player_sprite.change_x = -PLAYER_SPRINT_SPEED
-                    self.player_sprite.change_x -= PLAYER_ACCELERATION
-        elif self.right_key_down and not self.left_key_down:
-            if self.player_sprite.change_x < 0:
-                self.player_sprite.sliding = SLIDING
-            else:
-                self.player_sprite.sliding = NOT_SLIDING
-            if self.sprint_key_down:
-                self.player_sprite.sprinting = SPRINTING
-                if self.player_sprite.change_x < PLAYER_SPRINT_SPEED:
-                    self.player_sprite.change_x += PLAYER_ACCELERATION
-                elif self.player_sprite.change_x > PLAYER_SPRINT_SPEED:
-                    self.player_sprite.change_x = PLAYER_SPRINT_SPEED
-            else:
-                self.player_sprite.sprinting = WALKING
-                if self.player_sprite.change_x < PLAYER_MOVEMENT_SPEED:
-                    self.player_sprite.change_x += PLAYER_ACCELERATION
-                elif self.player_sprite.change_x > PLAYER_MOVEMENT_SPEED:
-                    if self.player_sprite.change_x > PLAYER_SPRINT_SPEED:
-                        self.player_sprite.change_x = PLAYER_SPRINT_SPEED
-                    self.player_sprite.change_x += PLAYER_ACCELERATION
-        elif self.player_sprite.change_x != 0:
-            self.player_sprite.sprinting = WALKING
-            self.player_sprite.sliding = NOT_SLIDING
-            if self.player_sprite.change_x > 0:
-                if self.player_sprite.change_x > PLAYER_ACCELERATION:
-                    self.player_sprite.change_x -= PLAYER_ACCELERATION
-                else:
-                    self.player_sprite.change_x = 0
-            elif self.player_sprite.change_x < 0:
-                if self.player_sprite.change_x < -PLAYER_ACCELERATION:
-                    self.player_sprite.change_x += PLAYER_ACCELERATION
-                else:
-                    self.player_sprite.change_x = 0
             
 
     def on_key_press(self, key, modifiers):
@@ -313,24 +126,23 @@ class MyGame(arcade.Window):
 
         # Jump
         if key == arcade.key.UP or key == arcade.key.W:
-            if self.physics_engine.can_jump():
-                self.player_sprite.change_y = PLAYER_JUMP_SPEED
-
+            self.jump_key_down = True
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            # Prevents the user from double jumping
+            self.jump_key_down = False
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
-            self.update_player_speed()
-
-
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
         # Right
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_key_down = True
-            self.update_player_speed()
-
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
         # Sprint
         elif key == arcade.key.J:
             self.sprint_key_down = True
-            self.update_player_speed()
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+
 
     def on_key_release(self, key, modifiers):
         """Called when the user releases a key."""
@@ -341,11 +153,12 @@ class MyGame(arcade.Window):
         elif key == arcade.key.J:
             self.sprint_key_down = False
 
+
     def on_update(self, delta_time):
         """Movement and game logic"""
 
         # Player movement and physics engine
-        self.update_player_speed()
+        self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
         self.physics_engine.update()
 
         # Update Animations
