@@ -1,5 +1,6 @@
 import arcade 
 import test_platformer as main
+import arcade.gui
 
 SCREEN_TITLE = "Launch"
 
@@ -9,17 +10,24 @@ class Title_Screen(arcade.View):
         # Call the parent class and set up the window
         super().__init__()
 
+        self.ui = arcade.gui.UIManager()
+
+        # Create a vertical BoxGroup to align buttons
+        self.v_box = arcade.gui.widgets.UIBoxLayout(space_between=20)
+
+        one_player = arcade.gui.UIFlatButton(text="1 PLAYER GAME", width=150)
+        two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=150)
+
+        self.v_box.add(one_player)
+        self.v_box.add(two_player)
+
+
     def on_show_view(self):
         """ This is run once when we switch to this view """
         arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
 
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.
-        arcade.set_viewport(0, self.window.width, 0, self.window.height)
-    
-    def launch(self):
-        #arcade.set_window("resources/temp_mario")
-        arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
         arcade.set_viewport(0, self.window.width, 0, self.window.height)
 
     def on_draw(self):
