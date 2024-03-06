@@ -20,8 +20,12 @@ RIGHT_FACING = 0
 LEFT_FACING = 1
 
 # Constants used to track if the player is sprinting
-SPRINTING = 0
-WALKING = 1
+WALKING = 0
+SPRINTING = 1
+
+# Constants to check if the player is sliding
+NOT_SLIDING = 0
+SLIDING = 1
 
 # Constants to track if the player is small or large
 SMALL = 0
@@ -32,8 +36,9 @@ POWERUP = 0
 POWERUP = 1
 
 # Movement speed of player, in pixels per frame
-PLAYER_MOVEMENT_SPEED = 5
+PLAYER_MOVEMENT_SPEED = 4
 PLAYER_SPRINT_SPEED = 8
+PLAYER_ACCELERATION = 0.5
 GRAVITY = 0.8
 PLAYER_JUMP_SPEED = 18
 
@@ -70,6 +75,8 @@ class PlayerCharacter(arcade.Sprite):
 
         # Track our state
         self.jumping = False
+        self.sprinting = WALKING
+        self.sliding = NOT_SLIDING
 
         # --- Load Textures ---
 
@@ -79,8 +86,11 @@ class PlayerCharacter(arcade.Sprite):
         # Load textures for idle standing
         self.small_idle_texture_pair = load_texture_pair(f"{main_path}mario_small_idle.png")
 
-        # Load textures for walking
+        # Load textures for jumping
         self.small_jump_texture_pair = load_texture_pair(f"{main_path}mario_small_jump.png")
+
+        # Load textures for sliding
+        self.small_slide_texture_pair = load_texture_pair(f"{main_path}mario_small_slide.png")
 
         # Load textures for walking
         self.walk_textures = []
@@ -118,14 +128,27 @@ class PlayerCharacter(arcade.Sprite):
             self.texture = self.small_idle_texture_pair[self.character_face_direction]
             return
 
-        # Walking animation
-        if self.update_counter >= 5:
-            self.cur_texture += 1
-            if self.cur_texture > 2:
-                self.cur_texture = 0
-            self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
-            self.update_counter = 0
+        if self.sliding == SLIDING:
+            self.texture = self.small_slide_texture_pair[self.character_face_direction]
+            return
+
+        # Walking and sprinting animation
+        if self.sprinting:
+            if self.update_counter >= 3:
+                self.cur_texture += 1
+                if self.cur_texture > 2:
+                    self.cur_texture = 0
+                self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
+                self.update_counter = 0
+        else:
+            if self.update_counter >= 5:
+                self.cur_texture += 1
+                if self.cur_texture > 2:
+                    self.cur_texture = 0
+                self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
+                self.update_counter = 0
         
+        # Update our counter
         self.update_counter += 1
 
 
@@ -232,18 +255,58 @@ class MyGame(arcade.Window):
     def update_player_speed(self):
 
         # Calculate speed based on the keys pressed
-        self.player_sprite.change_x = 0
-
         if self.left_key_down and not self.right_key_down:
-            if self.sprint_key_down:
-                self.player_sprite.change_x = -PLAYER_SPRINT_SPEED
+            if self.player_sprite.change_x > 0:
+                self.player_sprite.sliding = SLIDING
             else:
-                self.player_sprite.change_x = -PLAYER_MOVEMENT_SPEED
+                self.player_sprite.sliding = NOT_SLIDING
+            if self.sprint_key_down:
+                self.player_sprite.sprinting = SPRINTING
+                if self.player_sprite.change_x > -PLAYER_SPRINT_SPEED:
+                    self.player_sprite.change_x -= PLAYER_ACCELERATION
+                elif self.player_sprite.change_x < PLAYER_SPRINT_SPEED:
+                    self.player_sprite.change_x = -PLAYER_SPRINT_SPEED
+            else:
+                self.player_sprite.sprinting = WALKING
+                if self.player_sprite.change_x > -PLAYER_MOVEMENT_SPEED:
+                    self.player_sprite.change_x -= PLAYER_ACCELERATION
+                elif self.player_sprite.change_x < -PLAYER_MOVEMENT_SPEED:
+                    if self.player_sprite.change_x < -PLAYER_SPRINT_SPEED:
+                        self.player_sprite.change_x = -PLAYER_SPRINT_SPEED
+                    self.player_sprite.change_x -= PLAYER_ACCELERATION
         elif self.right_key_down and not self.left_key_down:
-            if self.sprint_key_down:
-                self.player_sprite.change_x = PLAYER_SPRINT_SPEED
+            if self.player_sprite.change_x < 0:
+                self.player_sprite.sliding = SLIDING
             else:
-                self.player_sprite.change_x = PLAYER_MOVEMENT_SPEED
+                self.player_sprite.sliding = NOT_SLIDING
+            if self.sprint_key_down:
+                self.player_sprite.sprinting = SPRINTING
+                if self.player_sprite.change_x < PLAYER_SPRINT_SPEED:
+                    self.player_sprite.change_x += PLAYER_ACCELERATION
+                elif self.player_sprite.change_x > PLAYER_SPRINT_SPEED:
+                    self.player_sprite.change_x = PLAYER_SPRINT_SPEED
+            else:
+                self.player_sprite.sprinting = WALKING
+                if self.player_sprite.change_x < PLAYER_MOVEMENT_SPEED:
+                    self.player_sprite.change_x += PLAYER_ACCELERATION
+                elif self.player_sprite.change_x > PLAYER_MOVEMENT_SPEED:
+                    if self.player_sprite.change_x > PLAYER_SPRINT_SPEED:
+                        self.player_sprite.change_x = PLAYER_SPRINT_SPEED
+                    self.player_sprite.change_x += PLAYER_ACCELERATION
+        elif self.player_sprite.change_x != 0:
+            self.player_sprite.sprinting = WALKING
+            self.player_sprite.sliding = NOT_SLIDING
+            if self.player_sprite.change_x > 0:
+                if self.player_sprite.change_x > PLAYER_ACCELERATION:
+                    self.player_sprite.change_x -= PLAYER_ACCELERATION
+                else:
+                    self.player_sprite.change_x = 0
+            elif self.player_sprite.change_x < 0:
+                if self.player_sprite.change_x < -PLAYER_ACCELERATION:
+                    self.player_sprite.change_x += PLAYER_ACCELERATION
+                else:
+                    self.player_sprite.change_x = 0
+            
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -257,6 +320,7 @@ class MyGame(arcade.Window):
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
             self.update_player_speed()
+
 
         # Right
         elif key == arcade.key.RIGHT or key == arcade.key.D:
@@ -272,24 +336,23 @@ class MyGame(arcade.Window):
         """Called when the user releases a key."""
         if key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = False
-            self.update_player_speed()
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_key_down = False
-            self.update_player_speed()
         elif key == arcade.key.J:
             self.sprint_key_down = False
-            self.update_player_speed()
 
     def on_update(self, delta_time):
         """Movement and game logic"""
 
-        # Move the player with the physics engine
+        # Player movement and physics engine
+        self.update_player_speed()
         self.physics_engine.update()
 
         # Update Animations
         self.scene.update_animation(
             delta_time, [LAYER_NAME_BACKGROUND, LAYER_NAME_PLATFORMS, LAYER_NAME_PLAYER]
         )
+
 
 
 
