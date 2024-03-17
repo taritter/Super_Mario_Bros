@@ -258,14 +258,14 @@ class MyGame(arcade.Window):
 
 def main():
     """Main function"""
-    window = MyGame()
-    window.setup()
+    # window = MyGame()
+    # window.setup()
+    # arcade.run()
+    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    start_view = launch.Title_Screen()
+    window.show_view(start_view)
     arcade.run()
-    #window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    #start_view = launch.Title_Screen()
-    #window.show_view(start_view)
-    #arcade.run()
-    #arcade.close_window()
+    # arcade.close_window()
 
 
 if __name__ == "__main__":
