@@ -24,6 +24,12 @@ PLAYER_START_X = SPRITE_PIXEL_SIZE * CHARACTER_SCALING * 2
 PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
 
 LAYER_NAME_PLATFORMS = "Platforms"
+LAYER_NAME_PLATFORMS_BREAKABLE = "Platform_Breakable"
+LAYER_NAME_PLATFORMS_COINS = "Platform_Coin"
+LAYER_NAME_PLATFORMS_ITEM = "Platform_Item"
+LAYER_NAME_MYSTERY_ITEM = "Mystery_Item"
+LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
+LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 
@@ -54,6 +60,11 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
+        # A Camera that can be used for scrolling the screen
+        self.camera = None
+
+        self.screen_center_x = 0
+        self.screen_center_y = 0
 
         # What key is pressed down?
         self.left_key_down = False
@@ -61,23 +72,41 @@ class MyGame(arcade.Window):
         self.jump_key_down = False
         self.sprint_key_down = False
 
-        # Mouse visibility
-        self.set_mouse_visible(False)
-
         # background color
         arcade.set_background_color(arcade.color.BLACK)
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
 
+        # Set up the Camera
+        self.camera = arcade.Camera(self.width, self.height)
+
         # Name of map file to load
-        map_name = "resources/demo_background.json"
+        map_name = "resources/backgrounds/1-1/world_1-1.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
         # use spatial hashing for detection.
         layer_options = {
             LAYER_NAME_PLATFORMS: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_PLATFORMS_BREAKABLE: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_PLATFORMS_COINS: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_PLATFORMS_ITEM: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_MYSTERY_ITEM: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_MYSTERY_COIN: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_COINS: {
                 "use_spatial_hash": True,
             },
             LAYER_NAME_BACKGROUND: {
@@ -92,11 +121,26 @@ class MyGame(arcade.Window):
         # from the map as SpriteLists in the scene in the proper order.
         self.scene = arcade.Scene.from_tilemap(self.tile_map)
 
-        # Set wall List
-        self.wall_list = self.tile_map.sprite_lists["Platforms"]
+        # Set platforms
+        self.platform_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS]
+        self.platform_breakable_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_BREAKABLE]
+        self.platform_coin_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_COINS]
+        self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
+        self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
+        self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
+
+        # Set coins
+        self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
 
         # Set background image
-        self.background_list = self.tile_map.sprite_lists["Background"]
+        self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
+
+        # Set the position of the background
+
+        # Calculate the drawing position for the background sprite
+        background_draw_x = self.tile_map.width*GRID_PIXEL_SIZE / 2
+        background_draw_y = self.tile_map.height*GRID_PIXEL_SIZE / 2 # Align top of sprite with top of screen
+        self.background_list[0].set_position(background_draw_x, background_draw_y)
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
@@ -108,7 +152,7 @@ class MyGame(arcade.Window):
 
         # --- Other stuff
         # Create the 'physics engine'
-        walls = [self.wall_list, ]
+        walls = [self.platform_list, self.platform_breakable_list, self.platform_coin_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
@@ -119,17 +163,28 @@ class MyGame(arcade.Window):
         # Clear the screen to the background color
         self.clear()
 
+        # Activate our Camera
+        self.camera.use()
+
         # Draw our Scene
         # Note, if you a want pixelated look, add pixelated=True to the parameters
 
-        # Calculate the drawing position for the background sprite
-        background_draw_x = 128 * TILE_SCALING
-        background_draw_y = 120 * TILE_SCALING # Align top of sprite with top of screen
+        # Draw the background
+        self.background_list.draw(pixelated=True)
 
-        # Set the position of the background sprite before drawing
-        self.background_list[0].set_position(background_draw_x, background_draw_y)
+        # Draw the platforms
+        self.platform_list.draw(pixelated=True)
+        self.platform_breakable_list.draw(pixelated=True)
+        self.platform_coin_list.draw(pixelated=True)
+        self.platform_item_list.draw(pixelated=True)
+        self.mystery_item_list.draw(pixelated=True)
+        self.mystery_coin_list.draw(pixelated=True)
 
-        self.scene.draw(pixelated=True)
+        # Draw the coins
+        self.coin_list.draw(pixelated=True)
+
+        # Draw the player
+        self.mario.draw(pixelated=True)
             
 
     def on_key_press(self, key, modifiers):
@@ -164,13 +219,25 @@ class MyGame(arcade.Window):
         elif key == arcade.key.J:
             self.sprint_key_down = False
 
+    def center_camera_to_player(self):
+        if (self.mario.center_x - (self.camera.viewport_width / 3)) > self.screen_center_x:
+            self.screen_center_x = self.mario.center_x - (self.camera.viewport_width / 3)
+
+        # Don't let camera travel past 0
+        if self.screen_center_x < 0:
+            self.screen_center_x = 0
+
+        player_centered = self.screen_center_x, self.screen_center_y
+
+        self.camera.move_to(player_centered)
 
     def on_update(self, delta_time):
         """Movement and game logic"""
-        if self.mario.center_x < 0:
-            self.mario.center_x = 0
-        elif self.mario.center_x > SCREEN_WIDTH:
-            self.mario.center_x = SCREEN_WIDTH
+        if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
+            self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
+            self.mario.change_x = 0
+        # elif self.mario.center_x > SCREEN_WIDTH:
+        #     self.mario.center_x = SCREEN_WIDTH
 
 
         # Player movement and physics engine
@@ -182,17 +249,23 @@ class MyGame(arcade.Window):
             delta_time, [LAYER_NAME_BACKGROUND, LAYER_NAME_PLATFORMS, LAYER_NAME_PLAYER]
         )
 
+        # Position the camera
+        self.center_camera_to_player()
+
 
 
 
 
 def main():
     """Main function"""
-    window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-    start_view = launch.Title_Screen()
-    window.show_view(start_view)
+    window = MyGame()
+    window.setup()
     arcade.run()
-    arcade.close_window()
+    #window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+    #start_view = launch.Title_Screen()
+    #window.show_view(start_view)
+    #arcade.run()
+    #arcade.close_window()
 
 
 if __name__ == "__main__":
