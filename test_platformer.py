@@ -7,7 +7,6 @@ from mario import Mario
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
-
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
 
