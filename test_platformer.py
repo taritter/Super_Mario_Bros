@@ -245,9 +245,9 @@ class MyGame(arcade.Window):
         if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
             self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
             self.mario.change_x = 0
-        # elif self.mario.center_x > SCREEN_WIDTH:
-        #     self.mario.center_x = SCREEN_WIDTH
-
+        
+        if self.mario.center_y < 0:
+            self.player_die()
 
 
         # Player movement and physics engine
@@ -262,6 +262,9 @@ class MyGame(arcade.Window):
         # Position the camera
         self.center_camera_to_player()
         
+        
+        
+        
             
     def save(self):
         save_file = open(self.save_path, "w")
@@ -273,7 +276,20 @@ class MyGame(arcade.Window):
         }
         json.dump(save_data, save_file)        
         save_file.close()
-
+        
+    def player_die(self):
+        self.lives -= 1
+        # Can likely put these at the start of setup:
+            # self.save() 
+            # Give a death screen
+        
+        # Reset the stage
+        self.setup()
+        
+        # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
+        # Ideally, also reset the save file to a default version
+        if self.lives == 0:
+            pass
 
 
 
