@@ -152,7 +152,7 @@ class MyGame(arcade.Window):
 
         # --- Other stuff
         # Create the 'physics engine'
-        walls = [self.platform_list, self.platform_breakable_list, self.platform_coin_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+        walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
@@ -173,12 +173,7 @@ class MyGame(arcade.Window):
         self.background_list.draw(pixelated=True)
 
         # Draw the platforms
-        self.platform_list.draw(pixelated=True)
-        self.platform_breakable_list.draw(pixelated=True)
-        self.platform_coin_list.draw(pixelated=True)
-        self.platform_item_list.draw(pixelated=True)
-        self.mystery_item_list.draw(pixelated=True)
-        self.mystery_coin_list.draw(pixelated=True)
+        self.scene.draw(pixelated=True)
 
         # Draw the coins
         self.coin_list.draw(pixelated=True)
@@ -246,7 +241,7 @@ class MyGame(arcade.Window):
 
         # Update Animations
         self.scene.update_animation(
-            delta_time, [LAYER_NAME_BACKGROUND, LAYER_NAME_PLATFORMS, LAYER_NAME_PLAYER]
+            delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
         )
 
         # Position the camera
