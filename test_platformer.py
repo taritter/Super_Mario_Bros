@@ -235,6 +235,7 @@ class MyGame(arcade.Window):
         #     self.mario.center_x = SCREEN_WIDTH
 
 
+
         # Player movement and physics engine
         self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
         self.physics_engine.update()
