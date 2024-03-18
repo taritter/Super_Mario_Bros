@@ -166,17 +166,8 @@ class MyGame(arcade.Window):
         self.camera.use()
 
         # Draw our Scene
-        # Note, if you a want pixelated look, add pixelated=True to the parameters
-
-        # Draw the background
-        self.background_list.draw(pixelated=True)
-
         # Draw the platforms
         self.scene.draw(pixelated=True)
-
-        # Draw the coins
-        self.coin_list.draw(pixelated=True)
-
         # Draw the player
         self.mario.draw(pixelated=True)
             
