@@ -77,6 +77,7 @@ class MyGame(arcade.Window):
         self.background_list = []
 
         self.player_list = []
+        self.coin_counter = 0
 
         self.coins = 0
 
@@ -192,7 +193,7 @@ class MyGame(arcade.Window):
         coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
 
         if coin_hit_list != 0:
-            coin_counter += 1
+            self.coin_counter += 1
 
 
 
