@@ -3,6 +3,7 @@ Platformer Template
 """
 import arcade
 import launch
+import random
 from mario import Mario
 import json
 from mystery_box import Mystery_Box
@@ -19,6 +20,7 @@ CHARACTER_SCALING = 2.5
 TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
+NUMBER_OF_COINS = 3
 
 # The gravity that is used by the physics engine
 GRAVITY = 0.8
@@ -184,6 +186,15 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
+
+
+        # See if the coin is hitting a platform
+        coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
+
+        if coin_hit_list != 0:
+            coin_counter += 1
+
+
 
     def on_draw(self):
         """Render the screen."""
