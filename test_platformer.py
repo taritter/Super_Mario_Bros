@@ -4,6 +4,7 @@ Platformer Template
 import arcade
 import launch
 from mario import Mario
+import json
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
@@ -42,6 +43,19 @@ class MyGame(arcade.Window):
         # Call the parent class and set up the window
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT,
                          SCREEN_TITLE, resizable=True)
+
+        # Put saved stuff here
+        save_name = "1"
+        self.save_path = f"resources/save_data/save_{save_name}.json"
+        save_file = open(self.save_path)
+        save_data = json.load(save_file)
+        
+        self.score = save_data['score']
+        self.coin_count = save_data['coin_count']
+        self.lives = save_data['lives']
+        self.stage = save_data['stage']
+        
+        save_file.close()
 
         # Our TileMap Object
         self.tile_map = None
@@ -85,6 +99,7 @@ class MyGame(arcade.Window):
         self.camera = arcade.Camera(self.width, self.height)
 
         # Name of map file to load
+        # Can modify this by replacing instances of '1-1' with self.stage
         map_name = "resources/backgrounds/1-1/world_1-1.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
@@ -240,6 +255,18 @@ class MyGame(arcade.Window):
 
         # Position the camera
         self.center_camera_to_player()
+        
+            
+    def save(self):
+        save_file = open(self.save_path, "w")
+        save_data = {
+            'score' : self.score,
+            'coin_count' : self.coin_count,
+            'lives' : self.lives,
+            'stage' : self.stage
+        }
+        json.dump(save_data, save_file)        
+        save_file.close()
 
 
 
