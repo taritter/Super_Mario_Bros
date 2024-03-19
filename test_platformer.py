@@ -246,7 +246,8 @@ class MyGame(arcade.Window):
             self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
             self.mario.change_x = 0
         
-        if self.mario.center_y < 0:
+        # Put slightly below 0
+        if self.mario.center_y < -1:
             self.player_die()
 
 
