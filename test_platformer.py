@@ -77,7 +77,8 @@ class MyGame(arcade.Window):
         self.background_list = []
 
         self.player_list = []
-        self.coin_counter = 0
+
+        self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
         self.coins = 0
 
@@ -189,14 +190,6 @@ class MyGame(arcade.Window):
         )
 
 
-        # See if the coin is hitting a platform
-        coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
-
-        if coin_hit_list != 0:
-            self.coin_counter += 1
-
-
-
     def on_draw(self):
         """Render the screen."""
 
@@ -279,6 +272,16 @@ class MyGame(arcade.Window):
         # Position the camera
         self.center_camera_to_player()
         
+        # See if the coin is hitting a platform
+        coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
+
+        for coin in coin_hit_list:
+            self.coin_count += 1
+            # Remove the coin
+            coin.remove_from_sprite_lists()
+            # Play a sound
+            arcade.play_sound(self.coin_sound)
+
         
         
         
