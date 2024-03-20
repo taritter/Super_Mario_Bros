@@ -98,6 +98,9 @@ class MyGame(arcade.Window):
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         
+        # Set a timer
+        self.timer = 300
+        
         # Reset the 'center' of the screen to 0
         self.screen_center_x = 0
         self.screen_center_y = 0
@@ -253,7 +256,7 @@ class MyGame(arcade.Window):
             self.mario.change_x = 0
         
         # Put slightly below 0
-        if self.mario.center_y < -1:
+        if self.mario.center_y < -SPRITE_PIXEL_SIZE:
             self.player_die()
 
 
