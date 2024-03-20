@@ -57,13 +57,12 @@ class Title_Screen(arcade.View):
         """ Draw this view """
         arcade.start_render()
         #self.clear()
-        arcade.draw_text("Start Game", self.window.width / 2, self.window.height / 2,
+        arcade.draw_text("Start Game", 300, 500,
                          arcade.color.WHITE, font_size=50, anchor_x="center")
-        arcade.draw_text("Click to advance", self.window.width / 2, self.window.height / 2-75,
+        arcade.draw_text("coin", self.window.width / 2, self.window.height / 2-75,
                          arcade.color.WHITE, font_size=20, anchor_x="center")
         
         # manager
-        arcade.start_render()
         self.manager.draw()
 
 

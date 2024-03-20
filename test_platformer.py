@@ -3,6 +3,7 @@ Platformer Template
 """
 import arcade
 import launch
+import random
 from mario import Mario
 import json
 from mystery_box import Mystery_Box
@@ -19,6 +20,7 @@ CHARACTER_SCALING = 2.5
 TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
+NUMBER_OF_COINS = 3
 
 # The gravity that is used by the physics engine
 GRAVITY = 0.8
@@ -75,6 +77,8 @@ class MyGame(arcade.Window):
         self.background_list = []
 
         self.player_list = []
+
+        self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
         # A Camera that can be used for scrolling the screen
         self.camera = None
@@ -181,6 +185,7 @@ class MyGame(arcade.Window):
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
 
+
     def on_draw(self):
         """Render the screen."""
 
@@ -263,11 +268,18 @@ class MyGame(arcade.Window):
 
         # Position the camera
         self.center_camera_to_player()
+
+        # See if the coin is hitting a platform
+        coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
+
+        for coin in coin_hit_list:
+            self.coin_count += 1
+            # Remove the coin
+            coin.remove_from_sprite_lists()
+            # Play a sound
+            arcade.play_sound(self.coin_sound)
         
         
-        
-        
-            
     def save(self):
         save_file = open(self.save_path, "w")
         save_data = {
@@ -293,8 +305,6 @@ class MyGame(arcade.Window):
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
-
-
 
 
 def main():
