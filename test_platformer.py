@@ -5,6 +5,9 @@ import arcade
 import launch
 from mario import Mario
 import json
+from mystery_box import Mystery_Box
+from coin import Coin
+
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
@@ -124,12 +127,15 @@ class MyGame(arcade.Window):
             },
             LAYER_NAME_MYSTERY_ITEM: {
                 "use_spatial_hash": True,
+                "custom_class": Mystery_Box,
             },
             LAYER_NAME_MYSTERY_COIN: {
                 "use_spatial_hash": True,
+                "custom_class": Mystery_Box,
             },
             LAYER_NAME_COINS: {
                 "use_spatial_hash": True,
+                "custom_class": Coin,
             },
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
