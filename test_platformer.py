@@ -3,8 +3,12 @@ Platformer Template
 """
 import arcade
 import launch
+import random
 from mario import Mario
 import json
+from mystery_box import Mystery_Box
+from coin import Coin
+
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
@@ -16,6 +20,7 @@ CHARACTER_SCALING = 2.5
 TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
+NUMBER_OF_COINS = 3
 
 # The gravity that is used by the physics engine
 GRAVITY = 0.8
@@ -73,6 +78,8 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
+        self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
+
         # A Camera that can be used for scrolling the screen
         self.camera = None
 
@@ -120,12 +127,15 @@ class MyGame(arcade.Window):
             },
             LAYER_NAME_MYSTERY_ITEM: {
                 "use_spatial_hash": True,
+                "custom_class": Mystery_Box,
             },
             LAYER_NAME_MYSTERY_COIN: {
                 "use_spatial_hash": True,
+                "custom_class": Mystery_Box,
             },
             LAYER_NAME_COINS: {
                 "use_spatial_hash": True,
+                "custom_class": Coin,
             },
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
@@ -175,6 +185,7 @@ class MyGame(arcade.Window):
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
 
+
     def on_draw(self):
         """Render the screen."""
 
@@ -185,17 +196,8 @@ class MyGame(arcade.Window):
         self.camera.use()
 
         # Draw our Scene
-        # Note, if you a want pixelated look, add pixelated=True to the parameters
-
-        # Draw the background
-        self.background_list.draw(pixelated=True)
-
         # Draw the platforms
         self.scene.draw(pixelated=True)
-
-        # Draw the coins
-        self.coin_list.draw(pixelated=True)
-
         # Draw the player
         self.mario.draw(pixelated=True)
             
@@ -266,11 +268,18 @@ class MyGame(arcade.Window):
 
         # Position the camera
         self.center_camera_to_player()
+
+        # See if the coin is hitting a platform
+        coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
+
+        for coin in coin_hit_list:
+            self.coin_count += 1
+            # Remove the coin
+            coin.remove_from_sprite_lists()
+            # Play a sound
+            arcade.play_sound(self.coin_sound)
         
         
-        
-        
-            
     def save(self):
         save_file = open(self.save_path, "w")
         save_data = {
@@ -296,8 +305,6 @@ class MyGame(arcade.Window):
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
-
-
 
 
 def main():
