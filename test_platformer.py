@@ -90,7 +90,11 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-
+        
+        # Reset the 'center' of the screen to 0
+        self.screen_center_x = 0
+        self.screen_center_y = 0
+        
         # Set up the Camera
         self.camera = arcade.Camera(self.width, self.height)
 
@@ -285,10 +289,11 @@ class MyGame(arcade.Window):
             # Give a death screen
         
         # Reset the stage
+
         self.setup()
         
         # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
-        # Ideally, also reset the save file to a default version
+        # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
 
