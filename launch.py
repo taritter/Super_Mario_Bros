@@ -1,6 +1,7 @@
 import arcade 
 import test_platformer as main
 import arcade.gui
+import json
 
 SCREEN_TITLE = "Launch"
 
@@ -31,6 +32,18 @@ class Title_Screen(arcade.View):
                 child=self.v_box)
         )
 
+        # Put saved stuff here
+        save_name = "1"
+        self.save_path = f"resources/save_data/save_{save_name}.json"
+        save_file = open(self.save_path)
+        save_data = json.load(save_file)
+        
+        self.score = save_data['score']
+        self.coin_count = save_data['coin_count']
+        self.lives = save_data['lives']
+        self.stage = save_data['stage']
+        
+        save_file.close()
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
