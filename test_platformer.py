@@ -4,6 +4,7 @@ Platformer Template
 import arcade
 import launch
 from mario import Mario
+import json
 # --- Constants
 SCREEN_TITLE = "Platformer"
 
@@ -43,6 +44,19 @@ class MyGame(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT,
                          SCREEN_TITLE, resizable=True)
 
+        # Put saved stuff here
+        save_name = "1"
+        self.save_path = f"resources/save_data/save_{save_name}.json"
+        save_file = open(self.save_path)
+        save_data = json.load(save_file)
+        
+        self.score = save_data['score']
+        self.coin_count = save_data['coin_count']
+        self.lives = save_data['lives']
+        self.stage = save_data['stage']
+        
+        save_file.close()
+
         # Our TileMap Object
         self.tile_map = None
 
@@ -76,11 +90,16 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-
+        
+        # Reset the 'center' of the screen to 0
+        self.screen_center_x = 0
+        self.screen_center_y = 0
+        
         # Set up the Camera
         self.camera = arcade.Camera(self.width, self.height)
 
         # Name of map file to load
+        # Can modify this by replacing instances of '1-1' with self.stage
         map_name = "resources/backgrounds/1-1/world_1-1.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
@@ -221,9 +240,10 @@ class MyGame(arcade.Window):
         if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
             self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
             self.mario.change_x = 0
-        # elif self.mario.center_x > SCREEN_WIDTH:
-        #     self.mario.center_x = SCREEN_WIDTH
-
+        
+        # Put slightly below 0
+        if self.mario.center_y < -1:
+            self.player_die()
 
 
         # Player movement and physics engine
@@ -237,7 +257,36 @@ class MyGame(arcade.Window):
 
         # Position the camera
         self.center_camera_to_player()
+        
+        
+        
+        
+            
+    def save(self):
+        save_file = open(self.save_path, "w")
+        save_data = {
+            'score' : self.score,
+            'coin_count' : self.coin_count,
+            'lives' : self.lives,
+            'stage' : self.stage
+        }
+        json.dump(save_data, save_file)        
+        save_file.close()
+        
+    def player_die(self):
+        self.lives -= 1
+        # Can likely put these at the start of setup:
+            # self.save() 
+            # Give a death screen
+        
+        # Reset the stage
 
+        self.setup()
+        
+        # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
+        # Ideally, also reset the save file to a default version (save_0.json)
+        if self.lives == 0:
+            pass
 
 
 
