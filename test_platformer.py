@@ -14,6 +14,7 @@ SCREEN_TITLE = "Platformer"
 
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
+DEFAULT_FONT_SIZE = 25
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 2.5
@@ -47,7 +48,7 @@ class MyGame(arcade.Window):
 
         # Call the parent class and set up the window
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT,
-                         SCREEN_TITLE, resizable=True)
+                         SCREEN_TITLE, resizable=False)
 
         # Put saved stuff here
         save_name = "1"
@@ -97,6 +98,9 @@ class MyGame(arcade.Window):
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
+        
+        # Set a timer
+        self.timer = 300
         
         # Reset the 'center' of the screen to 0
         self.screen_center_x = 0
@@ -200,7 +204,22 @@ class MyGame(arcade.Window):
         self.scene.draw(pixelated=True)
         # Draw the player
         self.mario.draw(pixelated=True)
-            
+        
+        # Draw the text last, so it goes on top
+        # Have to squeeze everything into one text draw, otherwise major lag
+        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage} \t\t {self.timer:03d}"
+        
+        arcade.draw_text(draw_string,
+                         self.screen_center_x + SCREEN_WIDTH / 10,
+                         SCREEN_HEIGHT - 2 * DEFAULT_FONT_SIZE,
+                         arcade.color.WHITE,
+                         DEFAULT_FONT_SIZE,
+                         multiline = True,
+                         width=SCREEN_WIDTH,
+                         align="left",
+                         font_name="Kenney Pixel")
+        
+    
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -252,10 +271,11 @@ class MyGame(arcade.Window):
             self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
             self.mario.change_x = 0
         
-        # Put slightly below 0
-        if self.mario.center_y < -1:
+        # Player dies if they fall below the world or run out of time
+        if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
             self.player_die()
-
+        
+        
 
         # Player movement and physics engine
         self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
