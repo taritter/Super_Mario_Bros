@@ -81,10 +81,6 @@ class MyGame(arcade.Window):
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
-        self.coins = 0
-
-        self.level = 1
-
         # A Camera that can be used for scrolling the screen
         self.camera = None
 
@@ -278,7 +274,8 @@ class MyGame(arcade.Window):
         # Player dies if they fall below the world or run out of time
         if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
             self.player_die()
-
+        
+        
 
         # Player movement and physics engine
         self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
@@ -291,7 +288,7 @@ class MyGame(arcade.Window):
 
         # Position the camera
         self.center_camera_to_player()
-        
+
         # See if the coin is hitting a platform
         coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
 
@@ -301,11 +298,8 @@ class MyGame(arcade.Window):
             coin.remove_from_sprite_lists()
             # Play a sound
             arcade.play_sound(self.coin_sound)
-
         
         
-        
-            
     def save(self):
         save_file = open(self.save_path, "w")
         save_data = {
@@ -331,8 +325,6 @@ class MyGame(arcade.Window):
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
-
-
 
 
 def main():
