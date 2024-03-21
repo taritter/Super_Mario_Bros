@@ -101,6 +101,7 @@ class MyGame(arcade.Window):
         
         # Set a timer
         self.timer = 300
+        self.frame_counter = 0
         
         # Reset the 'center' of the screen to 0
         self.screen_center_x = 0
@@ -270,6 +271,12 @@ class MyGame(arcade.Window):
         if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
             self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
             self.mario.change_x = 0
+        
+        # Decrement timer every 21 frames or so
+        self.frame_counter += 1
+        if self.frame_counter > 20:
+            self.frame_counter = 0
+            self.timer -= 1
         
         # Player dies if they fall below the world or run out of time
         if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
