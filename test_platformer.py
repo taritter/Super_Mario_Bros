@@ -119,15 +119,19 @@ class MyGame(arcade.Window):
         layer_options = {
             LAYER_NAME_PLATFORMS: {
                 "use_spatial_hash": True,
+                "hit_box_algorithm": "None",
             },
             LAYER_NAME_PLATFORMS_BREAKABLE: {
                 "use_spatial_hash": True,
+                "hit_box_algorithm": "None",
             },
             LAYER_NAME_PLATFORMS_COINS: {
                 "use_spatial_hash": True,
+                "hit_box_algorithm": "None",
             },
             LAYER_NAME_PLATFORMS_ITEM: {
                 "use_spatial_hash": True,
+                "hit_box_algorithm": "None",
             },
             LAYER_NAME_MYSTERY_ITEM: {
                 "use_spatial_hash": True,
