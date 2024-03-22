@@ -298,13 +298,25 @@ class MyGame(arcade.Window):
 
         # See if the coin is hitting a platform
         coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
-
+        # coin_hit_list = arcade.get_sprites_at_point(self.mario.position, self.coin_list)
+        
         for coin in coin_hit_list:
             self.coin_count += 1
             # Remove the coin
             coin.remove_from_sprite_lists()
             # Play a sound
             arcade.play_sound(self.coin_sound)
+            
+            
+        # Proof of concept of hitting the above block:
+        # Testing with breakable blocks first
+        block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+
+        for block in block_hit_list:
+            # Remove the block
+            block.remove_from_sprite_lists()
+            # Play a sound (change to breaking sound)
+            # arcade.play_sound(self.coin_sound)
         
         
     def save(self):
