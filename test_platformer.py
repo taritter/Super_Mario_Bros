@@ -8,6 +8,8 @@ from mario import Mario
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
+from load_textures import load_texture_pair
+
 
 # --- Constants
 SCREEN_TITLE = "Platformer"
@@ -38,6 +40,69 @@ LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
 LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
+LAYER_NAME_ENEMIES = "Enemies"
+
+class Entity(arcade.Sprite):
+    def __init__(self, name_folder, name_file):
+        super().__init__()
+
+        # Default to facing right
+        self.facing_direction = RIGHT_FACING
+
+        # Used for image sequences
+        self.cur_texture = 0
+        self.scale = CHARACTER_SCALING
+        self.character_face_direction = RIGHT_FACING
+
+        main_path = f":resources:images/animated_characters/{name_folder}/{name_file}"
+
+        self.idle_texture_pair = load_texture_pair(f"{main_path}_idle.png")
+        self.jump_texture_pair = load_texture_pair(f"{main_path}_jump.png")
+        self.fall_texture_pair = load_texture_pair(f"{main_path}_fall.png")
+
+        # Load textures for walking
+        self.walk_textures = []
+        for i in range(8):
+            texture = load_texture_pair(f"{main_path}_walk{i}.png")
+            self.walk_textures.append(texture)
+
+        # Load textures for climbing
+        self.climbing_textures = []
+        texture = arcade.load_texture(f"{main_path}_climb0.png")
+        self.climbing_textures.append(texture)
+        texture = arcade.load_texture(f"{main_path}_climb1.png")
+        self.climbing_textures.append(texture)
+
+        # Set the initial texture
+        self.texture = self.idle_texture_pair[0]
+
+        # Hit box will be set based on the first image used. If you want to specify
+        # a different hit box, you can do it like the code below.
+        # set_hit_box = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
+        self.hit_box = self.texture.hit_box_points
+
+
+class Enemy(Entity):
+    def __init__(self, name_folder, name_file):
+
+        # Setup parent class
+        super().__init__(name_folder, name_file)
+
+
+class GoombaEnemy(Enemy):
+    def __init__(self):
+
+        # Set up parent class
+        super().__init__("goomba", "goomba")
+
+
+#class ZombieEnemy(Enemy):
+    #def __init__(self):
+
+        # Set up parent class
+        #super().__init__("zombie", "zombie")
+
+
 
 class MyGame(arcade.Window):
     """
@@ -176,6 +241,28 @@ class MyGame(arcade.Window):
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
+        # -- Enemies
+        enemies_layer = self.tile_map.object_lists[LAYER_NAME_ENEMIES]
+
+        for my_object in enemies_layer:
+            cartesian = self.tile_map.get_cartesian(
+                my_object.shape[0], my_object.shape[1]
+            )
+            enemy_type = my_object.properties["type"]
+            if enemy_type == "goomba":
+                enemy = GoombaEnemy()
+            #elif enemy_type == "zombie":
+                #enemy = ZombieEnemy()
+            else:
+                raise Exception(f"Unknown enemy type {enemy_type}.")
+            enemy.center_x = math.floor(
+                cartesian[0] * TILE_SCALING * self.tile_map.tile_width
+            )
+            enemy.center_y = math.floor(
+                (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
+            )
+            self.scene.add_sprite(LAYER_NAME_ENEMIES, enemy)
+
         # Set up the player, specifically placing it at these coordinates.
         self.mario = Mario(CHARACTER_SCALING)
         self.mario.center_x = 48
@@ -283,7 +370,7 @@ class MyGame(arcade.Window):
 
         # Update Animations
         self.scene.update_animation(
-            delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+            delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
         )
 
         # Position the camera
