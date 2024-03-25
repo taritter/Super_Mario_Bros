@@ -312,7 +312,10 @@ class MyGame(arcade.Window):
         # Testing with breakable blocks first
         block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
 
+        # Later, add a requisite that the mario must be big
         for block in block_hit_list:
+            # Perhaps change this to a call to a function that activates some block_break
+            # event at the position of each broken block
             # Remove the block
             block.remove_from_sprite_lists()
             # Play a sound (change to breaking sound)
