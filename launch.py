@@ -14,13 +14,30 @@ class Title_Screen(arcade.View):
         self.manager = arcade.gui.UIManager()
         self.manager.enable()
 
+        # background
+        self.background = arcade.load_texture("resources/backgrounds/supermariotitle.png")
+
         self.ui = arcade.gui.UIManager()
 
         # Create a vertical BoxGroup to align buttons
-        self.v_box = arcade.gui.widgets.UIBoxLayout(space_between=20)
+        self.v_box = arcade.gui.widgets.UIBoxLayout(space_between=10)
 
-        one_player = arcade.gui.UIFlatButton(text="1 PLAYER GAME", width=150)
-        two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=150)
+        mario_style = {
+            "font_name": "Kenney Pixel",
+            "font_size": 15,
+            "font_color": arcade.color.WHITE,
+            "border_width": 2,
+            "border_color": None,
+            "bg_color": None,
+
+            # used if button is pressed
+            "bg_color_pressed": arcade.color.WHITE,
+            "border_color_pressed": arcade.color.WHITE,  # also used when hovered
+            "font_color_pressed": arcade.color.WHITE,
+        }
+
+        one_player = arcade.gui.UIFlatButton(text="1 PLAYER GAME", width=200, style=mario_style)
+        two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=200, style=mario_style)
 
         self.v_box.add(one_player)
         self.v_box.add(two_player)
@@ -28,7 +45,7 @@ class Title_Screen(arcade.View):
         self.manager.add(
             arcade.gui.UIAnchorWidget(
                 anchor_x="center_x",
-                anchor_y="center_y",
+                anchor_y="center_y", align_y= -50,
                 child=self.v_box)
         )
 
@@ -47,7 +64,6 @@ class Title_Screen(arcade.View):
 
     def on_show_view(self):
         """ This is run once when we switch to this view """
-        arcade.set_background_color(arcade.csscolor.DARK_SLATE_BLUE)
 
         # Reset the viewport, necessary if we have a scrolling game and we need
         # to reset the viewport back to the start so we can see what we draw.
@@ -57,10 +73,22 @@ class Title_Screen(arcade.View):
         """ Draw this view """
         arcade.start_render()
         #self.clear()
-        arcade.draw_text("Start Game", 300, 500,
-                         arcade.color.WHITE, font_size=50, anchor_x="center")
+        arcade.draw_lrwh_rectangle_textured(0, 0, main.SCREEN_WIDTH, main.SCREEN_HEIGHT, self.background)
+        
         arcade.draw_text(self.coin_count, self.window.width / 2, self.window.height / 2-75,
                          arcade.color.WHITE, font_size=20, anchor_x="center")
+        
+        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage}"
+
+        arcade.draw_text(draw_string,
+                         main.SCREEN_WIDTH / 10,
+                         main.SCREEN_HEIGHT - 2 * main.DEFAULT_FONT_SIZE,
+                         arcade.color.WHITE,
+                         main.DEFAULT_FONT_SIZE,
+                         multiline = True,
+                         width=main.SCREEN_WIDTH,
+                         align="left",
+                         font_name="Kenney Pixel")
         
         # manager
         self.manager.draw()
