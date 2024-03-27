@@ -78,8 +78,6 @@ class MyGame(arcade.Window):
         # Our Scene Object
         self.scene = None
 
-        #todo: create the goombas here?
-
         # Separate variable that holds the player sprite
         self.mario = None
 
@@ -353,7 +351,7 @@ class MyGame(arcade.Window):
             arcade.play_sound(self.coin_sound)
 
 
-        # Goomba
+        #  Goomba movement put logic here
         enemy_hit_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
 
         for enemy in enemy_hit_list:
