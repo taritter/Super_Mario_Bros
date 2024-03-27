@@ -230,25 +230,25 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
         # Make sure that we are supposed to be doing updates
-        if self.do_update:
-            # Jump
-            if key == arcade.key.UP or key == arcade.key.W:
-                self.jump_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-                # Prevents the user from double jumping
-                self.jump_key_down = False
-            # Left
-            elif key == arcade.key.LEFT or key == arcade.key.A:
-                self.left_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-            # Right
-            elif key == arcade.key.RIGHT or key == arcade.key.D:
-                self.right_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-            # Sprint
-            elif key == arcade.key.J:
-                self.sprint_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+        #if self.do_update:
+        # Jump
+        if key == arcade.key.UP or key == arcade.key.W:
+            self.jump_key_down = True
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            # Prevents the user from double jumping
+            self.jump_key_down = False
+        # Left
+        elif key == arcade.key.LEFT or key == arcade.key.A:
+            self.left_key_down = True
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+        # Right
+        elif key == arcade.key.RIGHT or key == arcade.key.D:
+            self.right_key_down = True
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+        # Sprint
+        elif key == arcade.key.J:
+            self.sprint_key_down = True
+            self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
 
 
     def on_key_release(self, key, modifiers):
@@ -281,6 +281,13 @@ class MyGame(arcade.Window):
                 self.mario.center_x = self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2
                 self.mario.change_x = 0
             
+            
+            self.frame_counter += 1
+            if self.frame_counter > 20:
+                self.timer -= 1
+                self.frame_counter = 0
+            
+            
             # Player dies if they fall below the world or run out of time
             if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
                 self.player_die()
@@ -301,6 +308,7 @@ class MyGame(arcade.Window):
 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
+            
 
             for coin in coin_hit_list:
                 self.do_update = False
@@ -316,14 +324,23 @@ class MyGame(arcade.Window):
   
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
-            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+            height_multiplier = int(self.mario.power > 0) + 1
+            
+            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
 
             # Later, add a requisite that the mario must be big
             for block in block_hit_list:
                 # Perhaps change this to a call to a function that activates some block_break
                 # event at the position of each broken block
                 # Remove the block
-                block.remove_from_sprite_lists()
+                if self.mario.power > 0:
+                    block.remove_from_sprite_lists()
+                
+                else:
+                    # This means Mario is small, bump the block!
+                    block.update = 0.1
+                    pass
+                
                 # Play a sound (change to breaking sound)
                 # arcade.play_sound(self.coin_sound)
 
