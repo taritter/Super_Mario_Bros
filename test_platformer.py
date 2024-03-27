@@ -192,6 +192,7 @@ class MyGame(arcade.Window):
             cartesian = self.tile_map.get_cartesian(
                 my_object.shape[0], my_object.shape[1]
             )
+            #todo: enemy_type== "goomba" might not work!!
             enemy_type = my_object.properties["type"]
             if enemy_type == "goomba":
                 enemy = GoombaEnemy()
@@ -199,6 +200,7 @@ class MyGame(arcade.Window):
                 #enemy = ZombieEnemy()
             else:
                 raise Exception(f"Unknown enemy type {enemy_type}.")
+            
             enemy.center_x = math.floor(
                 cartesian[0] * TILE_SCALING * self.tile_map.tile_width
             )
