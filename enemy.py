@@ -55,5 +55,5 @@ class Enemy(arcade.Sprite):
             self.texture = self.walk_textures[0][1]  # Left-facing texture
 
 class GoombaEnemy(Enemy):
-    def __init__(self):
+   def __init__(self):
         super().__init__("sprites", "goomba_1.png")  # Initialize with goomba sprite folder and file name

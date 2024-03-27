@@ -7,6 +7,7 @@ import launch
 import random
 from mario import Mario
 from enemy import Enemy
+from enemy import GoombaEnemy
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
@@ -47,7 +48,6 @@ LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_ENEMIES = "Enemies"
 
-
 class MyGame(arcade.Window):
     """
     Main application class.
@@ -77,6 +77,8 @@ class MyGame(arcade.Window):
 
         # Our Scene Object
         self.scene = None
+
+        #todo: create the goombas here?
 
         # Separate variable that holds the player sprite
         self.mario = None
@@ -192,22 +194,32 @@ class MyGame(arcade.Window):
             cartesian = self.tile_map.get_cartesian(
                 my_object.shape[0], my_object.shape[1]
             )
+
             #todo: enemy_type== "goomba" might not work!!
-            enemy_type = my_object.properties["type"]
-            if enemy_type == "goomba":
-                enemy = GoombaEnemy()
+            #enemy_type = my_object.properties["type"]
+            #if enemy_type == "goomba":
+                #enemy = GoombaEnemy()
             #elif enemy_type == "zombie":
                 #enemy = ZombieEnemy()
-            else:
-                raise Exception(f"Unknown enemy type {enemy_type}.")
+            #else:
+                #raise Exception(f"Unknown enemy type {enemy_type}.")
             
+            goomba = GoombaEnemy()
+            # Set the initial position of the Goomba
+            goomba.center_x = 55  # Set the x-coordinate according to your game's layout
+            goomba.center_y = 48  # Set the y-coordinate according to your game's layout
+            # Add the Goomba to the appropriate sprite list
+            self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
+
+            '''
             enemy.center_x = math.floor(
                 cartesian[0] * TILE_SCALING * self.tile_map.tile_width
             )
             enemy.center_y = math.floor(
                 (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
             )
-            self.scene.add_sprite(LAYER_NAME_ENEMIES, enemy)
+            '''
+            self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
 
         # Set up the player, specifically placing it at these coordinates.
         self.mario = Mario(CHARACTER_SCALING)
@@ -235,6 +247,9 @@ class MyGame(arcade.Window):
         # Draw our Scene
         # Draw the platforms
         self.scene.draw(pixelated=True)
+
+        #Todo: Draw the goombas
+
         # Draw the player
         self.mario.draw(pixelated=True)
         
