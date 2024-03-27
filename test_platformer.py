@@ -46,7 +46,7 @@ LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
 LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
-LAYER_NAME_ENEMIES = "Enemies"
+LAYER_NAME_ENEMIES = "Goomba"
 
 class MyGame(arcade.Window):
     """
@@ -188,38 +188,38 @@ class MyGame(arcade.Window):
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         # -- Enemies
-        enemies_layer = self.tile_map.object_lists[LAYER_NAME_ENEMIES]
+        enemies_layer = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
 
-        for my_object in enemies_layer:
-            cartesian = self.tile_map.get_cartesian(
-                my_object.shape[0], my_object.shape[1]
-            )
+        # for my_object in enemies_layer:
+        #     cartesian = self.tile_map.get_cartesian(
+        #         my_object.shape[0], my_object.shape[1]
+        #     )
 
-            #todo: enemy_type== "goomba" might not work!!
-            #enemy_type = my_object.properties["type"]
-            #if enemy_type == "goomba":
-                #enemy = GoombaEnemy()
-            #elif enemy_type == "zombie":
-                #enemy = ZombieEnemy()
-            #else:
-                #raise Exception(f"Unknown enemy type {enemy_type}.")
+        #     #todo: enemy_type== "goomba" might not work!!
+        #     #enemy_type = my_object.properties["type"]
+        #     #if enemy_type == "goomba":
+        #         #enemy = GoombaEnemy()
+        #     #elif enemy_type == "zombie":
+        #         #enemy = ZombieEnemy()
+        #     #else:
+        #         #raise Exception(f"Unknown enemy type {enemy_type}.")
             
-            goomba = GoombaEnemy()
-            # Set the initial position of the Goomba
-            goomba.center_x = 55  # Set the x-coordinate according to your game's layout
-            goomba.center_y = 48  # Set the y-coordinate according to your game's layout
-            # Add the Goomba to the appropriate sprite list
-            self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
+        #     goomba = GoombaEnemy()
+        #     # Set the initial position of the Goomba
+        #     goomba.center_x = 55  # Set the x-coordinate according to your game's layout
+        #     goomba.center_y = 48  # Set the y-coordinate according to your game's layout
+        #     # Add the Goomba to the appropriate sprite list
+        #     self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
 
-            '''
-            enemy.center_x = math.floor(
-                cartesian[0] * TILE_SCALING * self.tile_map.tile_width
-            )
-            enemy.center_y = math.floor(
-                (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
-            )
-            '''
-            self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
+        #     '''
+        #     enemy.center_x = math.floor(
+        #         cartesian[0] * TILE_SCALING * self.tile_map.tile_width
+        #     )
+        #     enemy.center_y = math.floor(
+        #         (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
+        #     )
+        #     '''
+        #     self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
 
         # Set up the player, specifically placing it at these coordinates.
         self.mario = Mario(CHARACTER_SCALING)
