@@ -90,6 +90,8 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
+        self.enemy_list = []
+
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
         # A Camera that can be used for scrolling the screen
@@ -155,6 +157,10 @@ class MyGame(arcade.Window):
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
             },
+            # LAYER_NAME_ENEMIES: {
+            #     "use_spatial_hash": True,
+            #     "custom_class": GoombaEnemy,
+            # },
         }
 
         # Read in the tiled map
@@ -171,6 +177,7 @@ class MyGame(arcade.Window):
         self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
+        self.enemy_list = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
 
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
@@ -188,8 +195,6 @@ class MyGame(arcade.Window):
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
 
         # -- Enemies
-        enemies_layer = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
-
         # for my_object in enemies_layer:
         #     cartesian = self.tile_map.get_cartesian(
         #         my_object.shape[0], my_object.shape[1]
@@ -346,6 +351,14 @@ class MyGame(arcade.Window):
             coin.remove_from_sprite_lists()
             # Play a sound
             arcade.play_sound(self.coin_sound)
+
+
+        # Goomba
+        enemy_hit_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
+
+        for enemy in enemy_hit_list:
+            enemy.remove_from_sprite_lists()
+
         
         
     def save(self):

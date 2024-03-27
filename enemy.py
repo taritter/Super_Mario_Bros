@@ -15,6 +15,24 @@ ENEMY_MOVEMENT_SPEED = 4
 class Enemy(arcade.Sprite):
     def __init__(self, name_folder, name_file):
         super().__init__()
+        self,
+        filename: str = None,
+        scale: float = 1,
+        image_x: float = 0,
+        image_y: float = 0,
+        image_width: float = 0,
+        image_height: float = 0,
+        center_x: float = 0,
+        center_y: float = 0,
+        _repeat_count_x=1,  # Unused
+        _repeat_count_y=1,  # Unused
+        flipped_horizontally: bool = False,
+        flipped_vertically: bool = False,
+        flipped_diagonally: bool = False,
+        hit_box_algorithm: str = 'Simple',
+        hit_box_detail: float = 4.5,
+        texture: arcade.texture.Texture = None,
+        angle: float = 0
 
         # Default to facing right
         self.facing_direction = RIGHT_FACING
@@ -28,7 +46,7 @@ class Enemy(arcade.Sprite):
             self.walk_textures.append(texture)
 
         # Set the initial texture
-        self.texture = self.walk_textures[0][0]  # Using the first texture
+        self.texture = self.walk_textures[0]  # Using the first texture
 
         # Hit box will be set based on the first image used
         self.hit_box = self.texture.hit_box_points
@@ -42,17 +60,18 @@ class Enemy(arcade.Sprite):
         self.center_x += self.change_x
         self.center_y += self.change_y
 
-        # Check if the enemy has reached the end of the platform, then change direction
-        if self.boundary_right and self.right > self.boundary_right:
-            self.change_x = -ENEMY_MOVEMENT_SPEED
-        elif self.boundary_left and self.left < self.boundary_left:
-            self.change_x = ENEMY_MOVEMENT_SPEED
 
-        # Update the texture based on direction
-        if self.change_x > 0:  # Moving right
-            self.texture = self.walk_textures[0][0]  # Right-facing texture
-        elif self.change_x < 0:  # Moving left
-            self.texture = self.walk_textures[0][1]  # Left-facing texture
+        # # Check if the enemy has reached the end of the platform, then change direction
+        # if self.boundary_right and self.right > self.boundary_right:
+        #     self.change_x = -ENEMY_MOVEMENT_SPEED
+        # elif self.boundary_left and self.left < self.boundary_left:
+        #     self.change_x = ENEMY_MOVEMENT_SPEED
+
+        # # Update the texture based on direction
+        # if self.change_x > 0:  # Moving right
+        #     self.texture = self.walk_textures[0][0]  # Right-facing texture
+        # elif self.change_x < 0:  # Moving left
+        #     self.texture = self.walk_textures[0][1]  # Left-facing texture
 
 class GoombaEnemy(Enemy):
    def __init__(self):
