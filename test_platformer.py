@@ -99,7 +99,7 @@ class MyGame(arcade.Window):
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
         self.do_update = True
-        
+
         # Set a timer
         self.timer = 300
         self.frame_counter = 0
@@ -313,7 +313,7 @@ class MyGame(arcade.Window):
                 coin.remove_from_sprite_lists()
                 # Play a sound
                 arcade.play_sound(self.coin_sound)
-                
+  
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
             block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
@@ -326,6 +326,7 @@ class MyGame(arcade.Window):
                 block.remove_from_sprite_lists()
                 # Play a sound (change to breaking sound)
                 # arcade.play_sound(self.coin_sound)
+
         else:
             # Only update the animation for Mario
             self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
