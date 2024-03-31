@@ -38,6 +38,7 @@ LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
 LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
+LAYER_NAME_FLAG = "Flag"
 
 class MyGame(arcade.Window):
     """
@@ -150,6 +151,9 @@ class MyGame(arcade.Window):
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
             },
+            LAYER_NAME_FLAG: {
+                "use_spatial_hash": True,
+            },
         }
 
         # Read in the tiled map
@@ -169,6 +173,9 @@ class MyGame(arcade.Window):
 
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
+
+        # flag tiles
+        self.flag_list = self.tile_map.sprite_lists[LAYER_NAME_FLAG]
 
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
@@ -292,7 +299,6 @@ class MyGame(arcade.Window):
             if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
                 self.player_die()
             
-            
 
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
@@ -305,6 +311,11 @@ class MyGame(arcade.Window):
 
             # Position the camera
             self.center_camera_to_player()
+
+            # if get to flagpole
+            if arcade.check_for_collision_with_list(self.mario, self.flag_list):
+                # make animation
+                self.mario.center_y += -1
 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
@@ -348,6 +359,10 @@ class MyGame(arcade.Window):
             # Only update the animation for Mario
             self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
             self.do_update = not self.mario.is_growing
+
+
+    def play_flag_animation(self):
+        pass
         
         
     def save(self):
