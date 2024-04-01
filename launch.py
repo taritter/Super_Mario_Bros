@@ -38,6 +38,11 @@ class Title_Screen(arcade.View):
             "border_width": 2,
             "border_color": None,
             "bg_color": None,
+
+            # used if button is pressed
+            "bg_color_pressed": arcade.color.WHITE,
+            "border_color_pressed": arcade.color.WHITE,  # also used when hovered
+            "font_color_pressed": arcade.color.BLACK,
         }
 
         one_player = StartButton(text="1 PLAYER GAME", width=200, style = mario_style)
