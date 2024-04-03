@@ -7,7 +7,7 @@ import launch
 import random
 from mario import Mario
 from enemy import Enemy
-from enemy import GoombaEnemy
+#from enemy import GoombaEnemy
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
@@ -164,10 +164,10 @@ class MyGame(arcade.Window):
             },
              LAYER_NAME_ENEMIES: {
                  "use_spatial_hash": True,
-                 "custom_class": GoombaEnemy,
-                 #"enemies": {
-                 #  "custom_class": Enemy
-                 #},
+                 #"custom_class": GoombaEnemy,
+                 "enemies": {
+                   "custom_class": Enemy
+                 },
              },
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
@@ -335,7 +335,6 @@ class MyGame(arcade.Window):
         self.camera.move_to(player_centered)
 
     def on_update(self, delta_time):
-
         # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
@@ -359,10 +358,10 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
 
-        # Update Animations
-        self.scene.update_animation(
-            delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
-        )
+            # Update Animations
+            self.scene.update_animation(
+                delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
+            )
 
             # Position the camera
             self.center_camera_to_player()
@@ -419,12 +418,12 @@ class MyGame(arcade.Window):
     def play_flag_animation(self):
         pass
 
-
+    """
         #  Goomba movement put logic here
         enemy_hit_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
 
         for enemy in enemy_hit_list:
-            enemy.remove_from_sprite_lists()
+            enemy.remove_from_sprite_lists()"""
 
         
         
