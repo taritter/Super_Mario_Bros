@@ -330,6 +330,11 @@ class MyGame(arcade.Window):
                 else:
                     self.mario.prev_power()
                 self.coin_count += 1
+                
+                if self.coin_coint > 99:
+                    self.lives += 1
+                    self.coin_count = 0
+                
                 # Remove the coin
                 coin.remove_from_sprite_lists()
                 # Play a sound
