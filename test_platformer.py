@@ -155,14 +155,18 @@ class MyGame(arcade.Window):
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
             },
-            # LAYER_NAME_ENEMIES: {
-            #     "use_spatial_hash": True,
-            #     "custom_class": GoombaEnemy,
-            # },
+             LAYER_NAME_ENEMIES: {
+                 "use_spatial_hash": True,
+                 "custom_class": GoombaEnemy,
+                 #"enemies": {
+                 #  "custom_class": Enemy
+                 #},
+             },
         }
 
         # Read in the tiled map
         self.tile_map = arcade.load_tilemap(map_name, TILE_SCALING, layer_options)
+        #self.tile_map = arcade.load_tilemap(f'map{self.level}.tmx', layer_options= layer_options)        
 
         # Initialize Scene with our TileMap, this will automatically add all layers
         # from the map as SpriteLists in the scene in the proper order.

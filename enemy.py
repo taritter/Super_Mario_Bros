@@ -12,8 +12,8 @@ LARGE = 1
 # Movement speed of enemy, in pixels per frame
 ENEMY_MOVEMENT_SPEED = 4
 
-class Enemy(arcade.Sprite):
-    def __init__(self, name_folder, name_file):
+class Enemy(arcade.AnimatedTimeBasedSprite):
+    def __init__(self, name_folder, name_file): #self, filename, **kwargs): #5.19
         super().__init__()
         self,
         filename: str = None,
