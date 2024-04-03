@@ -331,7 +331,7 @@ class MyGame(arcade.Window):
                     self.mario.prev_power()
                 self.coin_count += 1
                 
-                if self.coin_coint > 99:
+                if self.coin_count > 99:
                     self.lives += 1
                     self.coin_count = 0
                 
