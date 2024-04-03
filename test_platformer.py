@@ -101,6 +101,8 @@ class MyGame(arcade.Window):
         """Set up the game here. Call this function to restart the game."""
         self.do_update = True
 
+        self.save()
+                
         # Set a timer
         self.timer = 300
         self.frame_counter = 0
