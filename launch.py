@@ -5,6 +5,15 @@ import json
 
 SCREEN_TITLE = "Launch"
 
+class StartButton(arcade.gui.UIFlatButton):
+    def on_click(self, event: arcade.gui.UIOnClickEvent):
+        arcade.close_window()
+        game_view = main.MyGame()
+        game_view.setup()
+        arcade.set_window(game_view)
+        arcade.run()
+        
+
 class Title_Screen(arcade.View):
     def __init__(self):
 
@@ -29,14 +38,9 @@ class Title_Screen(arcade.View):
             "border_width": 2,
             "border_color": None,
             "bg_color": None,
-
-            # used if button is pressed
-            "bg_color_pressed": arcade.color.WHITE,
-            "border_color_pressed": arcade.color.WHITE,  # also used when hovered
-            "font_color_pressed": arcade.color.WHITE,
         }
 
-        one_player = arcade.gui.UIFlatButton(text="1 PLAYER GAME", width=200, style=mario_style)
+        one_player = StartButton(text="1 PLAYER GAME", width=200, style = mario_style)
         two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=200, style=mario_style)
 
         self.v_box.add(one_player)
@@ -62,12 +66,6 @@ class Title_Screen(arcade.View):
         
         save_file.close()
 
-    def on_show_view(self):
-        """ This is run once when we switch to this view """
-
-        # Reset the viewport, necessary if we have a scrolling game and we need
-        # to reset the viewport back to the start so we can see what we draw.
-        arcade.set_viewport(0, self.window.width, 0, self.window.height)
 
     def on_draw(self):
         """ Draw this view """
@@ -94,12 +92,9 @@ class Title_Screen(arcade.View):
         self.manager.draw()
 
 
-    def on_mouse_press(self, _x, _y, _button, _modifiers):
-        """ If the user presses the mouse button, start the game. """
-        arcade.close_window()
+    # def on_mouse_press(self, _x, _y, _button, _modifiers):
+    #     """ If the user presses the mouse button, start the game. """
+    #     arcade.close_window()
 
 
-        game_view = main.MyGame()
-        game_view.setup()
-        arcade.set_window(game_view)
-        arcade.run()
+        
