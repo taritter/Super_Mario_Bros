@@ -33,7 +33,7 @@ class Title_Screen(arcade.View):
 
         mario_style = {
             "font_name": "Kenney Pixel",
-            "font_size": 15,
+            "font_size": 25,
             "font_color": arcade.color.WHITE,
             "border_width": 2,
             "border_color": None,
@@ -45,8 +45,22 @@ class Title_Screen(arcade.View):
             "font_color_pressed": arcade.color.BLACK,
         }
 
+        dontuse_style = {
+            "font_name": "Kenney Pixel",
+            "font_size": 25,
+            "font_color": arcade.color.GRAY,
+            "border_width": 2,
+            "border_color": None,
+            "bg_color": None,
+
+            # used if button is pressed
+            "bg_color_pressed": arcade.color.WHITE,
+            "border_color_pressed": arcade.color.WHITE,  # also used when hovered
+            "font_color_pressed": arcade.color.BLACK,
+        }
+
         one_player = StartButton(text="1 PLAYER GAME", width=200, style = mario_style)
-        two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=200, style=mario_style)
+        two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=200, style=dontuse_style)
 
         self.v_box.add(one_player)
         self.v_box.add(two_player)
@@ -77,9 +91,6 @@ class Title_Screen(arcade.View):
         arcade.start_render()
         #self.clear()
         arcade.draw_lrwh_rectangle_textured(0, 0, main.SCREEN_WIDTH, main.SCREEN_HEIGHT, self.background)
-        
-        arcade.draw_text(self.coin_count, self.window.width / 2, self.window.height / 2-75,
-                         arcade.color.WHITE, font_size=20, anchor_x="center")
         
         draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage}"
 

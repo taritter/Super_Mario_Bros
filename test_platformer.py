@@ -2,6 +2,7 @@
 Platformer Template
 """
 import arcade
+import time
 import launch
 import random
 from mario import Mario
@@ -39,6 +40,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
+LAYER_NAME_DOOR = "Next_Level_Door"
 
 class MyGame(arcade.Window):
     """
@@ -73,6 +75,8 @@ class MyGame(arcade.Window):
         # Separate variable that holds the player sprite
         self.mario = None
 
+        self.mario_door = False
+
         # Our physics engine
         self.physics_engine = None
 
@@ -81,6 +85,8 @@ class MyGame(arcade.Window):
         self.player_list = []
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
+
+        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
 
         # A Camera that can be used for scrolling the screen
         self.camera = None
@@ -113,8 +119,10 @@ class MyGame(arcade.Window):
         self.camera = arcade.Camera(self.width, self.height)
 
         # Name of map file to load
-        # Can modify this by replacing instances of '1-1' with self.stage
-        map_name = "resources/backgrounds/1-1/world_1-1.json"
+        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
+        self.stage_num = 1
+        self.stage = self.stages[self.stage_num]
+        map_name = f"resources/backgrounds/1-1/world_{self.stage}.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -154,6 +162,9 @@ class MyGame(arcade.Window):
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
             },
+            LAYER_NAME_DOOR: {
+                "use_spatial_hash": True,
+            },
         }
 
         # Read in the tiled map
@@ -179,6 +190,9 @@ class MyGame(arcade.Window):
 
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
+
+        # door tile
+        self.door = self.tile_map.sprite_lists[LAYER_NAME_DOOR]
 
         # Set the position of the background
 
@@ -232,6 +246,10 @@ class MyGame(arcade.Window):
                          align="left",
                          font_name="Kenney Pixel")
         
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.timeUp)
     
 
     def on_key_press(self, key, modifiers):
@@ -296,10 +314,10 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE:
                 self.player_die()
-            
-
+                
+        
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
@@ -312,10 +330,20 @@ class MyGame(arcade.Window):
             # Position the camera
             self.center_camera_to_player()
 
+
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
-                # make animation
-                self.mario.center_y += -1
+                # call animation method
+                self.mario_door = True
+
+            if self.mario_door:
+                self.flag_animation()
+
+            self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
+
+            if self.door_hit:
+                self.mario.visible = False
+                
 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
@@ -361,9 +389,16 @@ class MyGame(arcade.Window):
             self.do_update = not self.mario.is_growing
 
 
-    def play_flag_animation(self):
-        pass
-        
+    def flag_animation(self):
+        self.mario.slidedown_flag()
+
+        if not arcade.check_for_collision_with_list(self.mario, self.door):
+            self.mario.walk_to_door()
+            self.mario.update_animation()
+        else:
+            self.mario_door = False
+
+
         
     def save(self):
         save_file = open(self.save_path, "w")
