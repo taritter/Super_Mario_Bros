@@ -97,19 +97,28 @@ class MyGame(arcade.Window):
         # background color
         arcade.set_background_color(arcade.color.BLACK)
 
+        
+
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-        self.do_update = True
+        self.startup = True
+        
+        self.timer = 300
+        self.frame_counter = 0
+
+        self.background = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
 
         # Store the save file, as the player has either died or gotten to
         # a new stage        
         self.save()
         
+    def setup_part_2(self):
+        
+        self.do_update = True
         # Initialize the set for handling when blocks are nudged
         self.nudged_blocks_list_set = ([],[],[],[],[])
                 
         # Set a timer
-        self.timer = 300
         self.frame_counter = 0
         
         # Reset the 'center' of the screen to 0
@@ -212,7 +221,28 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         """Render the screen."""
-
+        
+        if self.startup:
+            self.clear()
+            
+            arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+            
+            draw_string = f"WORLD  {self.stage}\n\n\t\t{self.lives}"
+            
+            self.draw_text()
+            
+            arcade.draw_text(draw_string,
+                             self.screen_center_x,
+                             self.screen_center_y + SCREEN_HEIGHT/2 + 3*DEFAULT_FONT_SIZE,
+                             arcade.color.WHITE,
+                             DEFAULT_FONT_SIZE * 1.5,
+                             multiline = True,
+                             width=SCREEN_WIDTH,
+                             align="center",
+                             font_name="Kenney Pixel")
+            
+            return
+        
         # Clear the screen to the background color
         self.clear()
 
@@ -225,6 +255,9 @@ class MyGame(arcade.Window):
         # Draw the player
         self.mario.draw(pixelated=True)
         
+        self.draw_text()
+        
+    def draw_text(self):
         # Draw the text last, so it goes on top
         # Have to squeeze everything into one text draw, otherwise major lag
         draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage} \t\t {self.timer:03d}"
@@ -238,8 +271,6 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        
-    
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -289,6 +320,16 @@ class MyGame(arcade.Window):
     def on_update(self, delta_time):
 
         # Make sure that we are supposed to be doing updates
+        
+        if self.startup:
+            self.frame_counter += 1
+            
+            if self.frame_counter == 150:
+                self.startup = False
+                self.setup_part_2()
+                
+            return # Early return
+        
         if self.do_update:
             """Movement and game logic"""
             if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
