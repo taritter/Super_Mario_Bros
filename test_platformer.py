@@ -77,12 +77,17 @@ class MyGame(arcade.Window):
 
         self.mario_door = False
 
+        self.mario_flag = False
+
         # Our physics engine
         self.physics_engine = None
 
         self.background_list = []
 
         self.player_list = []
+
+        # -- sounds --
+        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
@@ -262,6 +267,7 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
+            arcade.play_sound(self.jump_sound)
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
@@ -334,9 +340,12 @@ class MyGame(arcade.Window):
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
                 # call animation method
-                self.mario_door = True
+                self.mario_flag = True
 
-            if self.mario_door:
+            if self.mario_flag:
+                self.mario.slidedown_flag()
+                self.mario_door = True
+            elif self.mario_door and self.mario_flag:
                 self.flag_animation()
 
             self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
@@ -390,8 +399,6 @@ class MyGame(arcade.Window):
 
 
     def flag_animation(self):
-        self.mario.slidedown_flag()
-
         if not arcade.check_for_collision_with_list(self.mario, self.door):
             self.mario.walk_to_door()
             self.mario.update_animation()

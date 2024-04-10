@@ -51,6 +51,7 @@ class Mario(arcade.Sprite):
         self.power = SMALL
         self.is_growing = False
 
+
         # --- Load Textures ---
 
         # Images from Kenney.nl's Asset Pack 3
