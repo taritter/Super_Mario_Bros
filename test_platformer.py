@@ -96,29 +96,21 @@ class MyGame(arcade.Window):
 
         # background color
         arcade.set_background_color(arcade.color.BLACK)
+        
+        self.background = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
 
         
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-        self.startup = True
         
-        self.timer = 300
-        self.frame_counter = 0
-
-        self.background = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
-
         # Store the save file, as the player has either died or gotten to
         # a new stage        
         self.save()
         
-    def setup_part_2(self):
+        self.startup = True
         
-        self.do_update = True
-        # Initialize the set for handling when blocks are nudged
-        self.nudged_blocks_list_set = ([],[],[],[],[])
-                
-        # Set a timer
+        self.timer = 300
         self.frame_counter = 0
         
         # Reset the 'center' of the screen to 0
@@ -127,6 +119,20 @@ class MyGame(arcade.Window):
         
         # Set up the Camera
         self.camera = arcade.Camera(self.width, self.height)
+        
+        player_centered = self.screen_center_x, self.screen_center_y
+
+        self.camera.move_to(player_centered)
+        
+        
+    def setup_part_2(self):
+        
+        self.do_update = True
+        # Initialize the set for handling when blocks are nudged
+        self.nudged_blocks_list_set = ([],[],[],[],[])
+                
+        # Reset the frame counter
+        self.frame_counter = 0
 
         # Name of map file to load
         # Can modify this by replacing instances of '1-1' with self.stage
@@ -221,9 +227,13 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         """Render the screen."""
+        # Clear the screen to the background color
+        self.clear()
+        
+        # Activate our Camera
+        self.camera.use()
         
         if self.startup:
-            self.clear()
             
             arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
             
@@ -243,12 +253,7 @@ class MyGame(arcade.Window):
             
             return
         
-        # Clear the screen to the background color
-        self.clear()
-
-        # Activate our Camera
-        self.camera.use()
-
+        
         # Draw our Scene
         # Draw the platforms
         self.scene.draw(pixelated=True)
@@ -294,6 +299,10 @@ class MyGame(arcade.Window):
         elif key == arcade.key.J:
             self.sprint_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+        # Reset
+        elif key == arcade.key.ESCAPE:
+            self.player_die()
 
 
     def on_key_release(self, key, modifiers):
