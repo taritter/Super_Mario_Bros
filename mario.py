@@ -258,22 +258,19 @@ class Mario(arcade.Sprite):
         self.change_x = 0
     
     def walk_to_door(self):
+        # Adjusting the speed to make Mario walk slower
+        self.change_x = PLAYER_MOVEMENT_SPEED
         self.character_face_direction = RIGHT_FACING
-        # if self.update_counter % 5 == 0:
-        #         self.cur_texture += 1
-        #         if self.cur_texture > 2:
-        #             self.cur_texture = 0
-        #         self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
         # Update texture every 5 updates (adjust as needed)
-        if self.update_counter % 1 == 0:
-            self.cur_texture = (self.cur_texture + 1) % len(self.walk_textures)
-            self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
+        if self.update_counter % 5 == 0:
+                self.cur_texture += 1
+                if self.cur_texture > 2:
+                    self.cur_texture = 0
+                self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
         self.update_counter += 1
         # Reset counter to prevent overflow
         if self.update_counter >= 1000:
             self.update_counter = 0
-        # Adjusting the speed to make Mario walk slower
-        self.change_x = PLAYER_MOVEMENT_SPEED
         
 
     def update_animation(self, delta_time: float = 1 / 60):
