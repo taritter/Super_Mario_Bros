@@ -94,6 +94,7 @@ class MyGame(arcade.Window):
         self.left_key_down = False
         self.right_key_down = False
         self.jump_key_down = False
+        self.down_key_down = False
         self.sprint_key_down = False
 
         # background color
@@ -110,7 +111,7 @@ class MyGame(arcade.Window):
         # a new stage        
         self.save()
         
-        self.stage_intro = True
+        # self.stage_intro = True
         
         self.timer = 300
         self.frame_counter = 0
@@ -125,9 +126,9 @@ class MyGame(arcade.Window):
         player_centered = self.screen_center_x, self.screen_center_y
 
         self.camera.move_to(player_centered)
+        self.stage_intro = False
         
-        
-    def setup_part_2(self):
+    # def setup_part_2(self):
         
         self.do_update = True
         # Initialize the set for handling when blocks are nudged
@@ -138,7 +139,7 @@ class MyGame(arcade.Window):
 
         # Name of map file to load
         # Can modify this by replacing instances of '1-1' with self.stage
-        map_name = "resources/backgrounds/1-1/world_1-1.json"
+        map_name = "resources/backgrounds/1-1/world_1-1_pipe_test.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -178,6 +179,9 @@ class MyGame(arcade.Window):
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
             },
+            LAYER_NAME_TELEPORT_EVENT: {
+                "use_spatial_hash": True,
+                },
         }
 
         # Read in the tiled map
@@ -194,18 +198,30 @@ class MyGame(arcade.Window):
         self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
-
+        
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
 
         # flag tiles
         self.flag_list = self.tile_map.sprite_lists[LAYER_NAME_FLAG]
-
+        
+        # teleport locations
+        full_teleport_list = self.tile_map.object_lists[LAYER_NAME_TELEPORT_EVENT]
+        
+        self.teleport_enter_list = []
+        self.teleport_exit_list = []
+        
+        for teleporter in full_teleport_list:
+            if "enter" in teleporter.name:
+                self.teleport_enter_list.append(teleporter)
+            else:
+                self.teleport_exit_list.append(teleporter)
+        
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
-
+        
         # Set the position of the background
-
+        
         # Calculate the drawing position for the background sprite
         background_draw_x = self.tile_map.width*GRID_PIXEL_SIZE / 2
         background_draw_y = self.tile_map.height*GRID_PIXEL_SIZE / 2 # Align top of sprite with top of screen
@@ -289,14 +305,29 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
+            
+            self.enter_pipe("up")
+            
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+            self.enter_pipe("left")
+            
         # Right
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+            self.enter_pipe("right")
+            
+        # Down
+        elif key == arcade.key.DOWN or key == arcade.key.S:
+            self.down_key_down = True
+            
+            self.enter_pipe("down")
+            
         # Sprint
         elif key == arcade.key.J:
             self.sprint_key_down = True
@@ -315,6 +346,27 @@ class MyGame(arcade.Window):
             self.right_key_down = False
         elif key == arcade.key.J:
             self.sprint_key_down = False
+
+
+    def enter_pipe(self, direction):
+        "Called for each directional key press, check if there is a pipe to enter, and enter it"
+        # Pipe Collision
+        # First, below
+        
+        # print(self.mario.center_x)
+        for teleporter in self.teleport_enter_list:
+             height_check_below = self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 1
+             
+             right_of_pipe = self.mario.center_x > teleporter.shape[0][0] * TILE_SCALING
+             left_of_pipe = self.mario.center_x < teleporter.shape[2][0] * TILE_SCALING
+             
+             in_pipe_vertical_zone = height_check_below < -teleporter.shape[2][1] * TILE_SCALING
+
+             if right_of_pipe and left_of_pipe and in_pipe_vertical_zone:
+                 1/0
+                 # print(teleporter.shape[0][0])
+             # self.mario.center_x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 1)
+        
 
     def center_camera_to_player(self):
         if (self.mario.center_x - (self.camera.viewport_width / 3)) > self.screen_center_x:
@@ -396,11 +448,15 @@ class MyGame(arcade.Window):
                 coin.remove_from_sprite_lists()
                 # Play a sound
                 arcade.play_sound(self.coin_sound)
-  
+                
+                
+            # Need for both breaking blocks and pipes above/below mario
+            height_multiplier = int(self.mario.power > 0) + 1
+                
+            #TODO: may need to recalc the height mult elsewhere
+    
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
-            height_multiplier = int(self.mario.power > 0) + 1
-            
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
