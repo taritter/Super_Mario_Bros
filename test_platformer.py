@@ -110,7 +110,7 @@ class MyGame(arcade.Window):
         # different levels
         self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
         self.stage_num = 1
-        self.mario_world = 0
+        self.mario_world = self.stages[self.stage_num]
         self.success_map = False
 
         # background color
@@ -289,7 +289,7 @@ class MyGame(arcade.Window):
     def draw_text(self):
         # Draw the text last, so it goes on top
         # Have to squeeze everything into one text draw, otherwise major lag
-        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage} \t\t {self.timer:03d}"
+        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.mario_world} \t\t {self.timer:03d}"
         
         arcade.draw_text(draw_string,
                          self.screen_center_x + SCREEN_WIDTH / 10,
@@ -533,7 +533,8 @@ class MyGame(arcade.Window):
         self.mario_world = self.stages[self.stage_num]
         print("stage is: ", self.mario_world)
         map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
-        success_map = True
+        self.success_map = True
+        self.stage = self.mario_world
         return map_name
 
         
