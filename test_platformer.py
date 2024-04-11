@@ -113,6 +113,7 @@ class MyGame(arcade.Window):
         self.left_key_down = False
         self.right_key_down = False
         self.jump_key_down = False
+        self.down_key_down = False
         self.sprint_key_down = False
 
         # different levels
@@ -135,6 +136,7 @@ class MyGame(arcade.Window):
         # a new stage        
         self.save()
         
+        self.do_update = False
         self.stage_intro = True
         
         self.timer = 300
@@ -151,7 +153,6 @@ class MyGame(arcade.Window):
 
         self.camera.move_to(player_centered)
         
-        
     def setup_part_2(self):
         
         self.do_update = True
@@ -163,10 +164,15 @@ class MyGame(arcade.Window):
 
         map_name = self.next_world()
 
+
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
         # use spatial hashing for detection.
         layer_options = {
+
+            LAYER_NAME_TELEPORT_EVENT: {
+                "use_spatial_hash": True,
+                },
             LAYER_NAME_PLATFORMS: {
                 "use_spatial_hash": True,
                 "hit_box_algorithm": "None",
@@ -235,15 +241,25 @@ class MyGame(arcade.Window):
 
         # flag tiles
         self.flag_list = self.tile_map.sprite_lists[LAYER_NAME_FLAG]
-
+        
+        # teleport locations
+        full_teleport_list = self.tile_map.object_lists[LAYER_NAME_TELEPORT_EVENT]
+        
+        self.teleport_enter_list = []
+        self.teleport_exit_list = []
+        
+        for teleporter in full_teleport_list:
+            if "enter" in teleporter.name:
+                self.teleport_enter_list.append(teleporter)
+            else:
+                self.teleport_exit_list.append(teleporter)
+        
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
-
         # door tile
         self.door = self.tile_map.sprite_lists[LAYER_NAME_DOOR]
-
         # Set the position of the background
-
+        
         # Calculate the drawing position for the background sprite
         background_draw_x = self.tile_map.width*GRID_PIXEL_SIZE / 2
         background_draw_y = self.tile_map.height*GRID_PIXEL_SIZE / 2 # Align top of sprite with top of screen
@@ -372,14 +388,28 @@ class MyGame(arcade.Window):
             # Prevents the user from double jumping
             self.jump_key_down = False
             arcade.play_sound(self.jump_sound)
+            
+            self.enter_pipe("up")
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+            self.enter_pipe("left")
+            
         # Right
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+            self.enter_pipe("right")
+            
+        # Down
+        elif key == arcade.key.DOWN or key == arcade.key.S:
+            self.down_key_down = True
+            
+            self.enter_pipe("down")
+            
         # Sprint
         elif key == arcade.key.J:
             self.sprint_key_down = True
@@ -398,6 +428,69 @@ class MyGame(arcade.Window):
             self.right_key_down = False
         elif key == arcade.key.J:
             self.sprint_key_down = False
+
+
+    def enter_pipe(self, direction):
+        "Called for each directional key press, check if there is a pipe to enter, and enter it"
+        # Pipe Collision
+        for teleporter in self.teleport_enter_list:
+            if direction in teleporter.name:
+                if direction in ["up","down"]:
+                    # TODO: fix vertical checks
+                    # Need horizontal checks
+                    right_of_pipe = self.mario.center_x > teleporter.shape[0][0] * TILE_SCALING
+                    left_of_pipe = self.mario.center_x < teleporter.shape[2][0] * TILE_SCALING
+                     
+                    if direction == "down":
+                        height_check_below = self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5
+                        in_pipe_vertical_zone = height_check_below < SCREEN_HEIGHT + teleporter.shape[0][1] * TILE_SCALING
+                    else:
+                        # direction will be "up"
+                        height_check_above = self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5
+                        in_pipe_vertical_zone = height_check_above > SCREEN_HEIGHT + teleporter.shape[2][1] * TILE_SCALING
+                        
+                    
+                    if right_of_pipe and left_of_pipe and in_pipe_vertical_zone:
+                        # All conditions met, go throught the pipe
+                        self.exit_pipe(teleporter.name[:2])
+                        return
+                 
+                elif direction in ["right","left"]:
+                    # Need vertical checks
+                    above_pipe = self.mario.center_y > SCREEN_HEIGHT + teleporter.shape[2][1] * TILE_SCALING
+                    below_pipe = self.mario.center_y < SCREEN_HEIGHT + teleporter.shape[0][1] * TILE_SCALING
+                    
+                    # Check to see that the 'activator' pixel is within the left/right bounds
+                    if direction == "left":
+                        right_of_pipe = self.mario.center_x - SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5 > teleporter.shape[0][0] * TILE_SCALING
+                        left_of_pipe = self.mario.center_x - SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5 < teleporter.shape[2][0] * TILE_SCALING
+                        
+                    else:
+                        right_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 > teleporter.shape[0][0] * TILE_SCALING
+                        left_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 < teleporter.shape[2][0] * TILE_SCALING
+                     
+                    if above_pipe and below_pipe and right_of_pipe and left_of_pipe:
+                        self.exit_pipe(teleporter.name[:2])
+                        return
+                     
+            
+    def exit_pipe(self, teleport_id):
+        # TODO: refigure to set the camera so that mario is on the far left
+        # Find output pipe position
+        for teleporter_output in self.teleport_exit_list:
+            # If the identifier characters are present, thats the pair
+            if teleport_id in teleporter_output.name:
+                # Note, in actuality one version would be needed for each direction
+                # as with enter_pipe
+                # However, in the interest of time, I won't do that
+                
+                self.mario.center_x = teleporter_output.shape[2][0] * TILE_SCALING
+                self.mario.center_y = SCREEN_HEIGHT + teleporter_output.shape[0][1] * TILE_SCALING
+                
+                self.screen_center_x = 0
+                self.screen_center_y = 0
+                # self.camera.move_to((self.screen_center_x, self.screen_center_y))
+        
 
     def center_camera_to_player(self):
         if (self.mario.center_x - (self.camera.viewport_width / 3)) > self.screen_center_x:
@@ -495,12 +588,30 @@ class MyGame(arcade.Window):
                 coin.remove_from_sprite_lists()
                 # Play a sound
                 arcade.play_sound(self.coin_sound)
-  
+                
+                
+            # Need for both breaking blocks and pipes above/below mario
+            self.height_multiplier = int(self.mario.power > 0) + 1
+             
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
-            height_multiplier = int(self.mario.power > 0) + 1
+            self.height_multiplier = int(self.mario.power > 0) + 1
             
-            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+            # Note that the multiplier for getting either side of mario's head (0.7)
+            # Is just barely smaller than it needs to be - it is possible to
+            # hit the block without it being added to the hit list
+            # However, increasing the value to 0.75 is just barely too much,
+            # and it is possible to hit a block from the side
+            
+            
+            # Git the block list for the left side of mario's head
+            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+            
+            # Add to that list the blocks on the right side of mario's head
+            block_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list))
+            
+            # Turn that list into a set to eliminate duplicate values
+            block_hit_list = set(block_hit_list)
 
             # Later, add a requisite that the mario must be big
             for block in block_hit_list:

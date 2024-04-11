@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="11" nextobjectid="1">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="16">
  <editorsettings>
-  <export target="1-1/world_1-1.json" format="json"/>
+  <export target="1-1/world_1-1_pipe_test.json" format="json"/>
  </editorsettings>
  <tileset firstgid="1" name="tileset" tilewidth="16" tileheight="16" tilecount="924" columns="33">
   <image source="tileset.png" width="528" height="448"/>
@@ -25,6 +25,12 @@
  <imagelayer id="2" name="Background">
   <image source="1-1/blank_world_1-1.png" width="3888" height="240"/>
  </imagelayer>
+ <objectgroup id="11" name="Teleport">
+  <object id="10" name="p1enterdown" x="920" y="145" width="16" height="13"/>
+  <object id="12" name="p1leavebottom" x="3663" y="25" width="16" height="13"/>
+  <object id="13" name="p2enterright" x="3841" y="179" width="12" height="26"/>
+  <object id="15" name="p2leavetop" x="2616" y="177" width="16" height="13"/>
+ </objectgroup>
  <layer id="9" name="Flag" width="243" height="15">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
