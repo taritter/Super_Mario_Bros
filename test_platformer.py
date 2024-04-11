@@ -2,18 +2,12 @@
 Platformer Template
 """
 import arcade
-import time
-import math
 import launch
 import random
 from mario import Mario
-from enemy import Enemy
-#from enemy import GoombaEnemy
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
-from load_textures import load_texture_pair
-
 
 # --- Constants
 SCREEN_TITLE = "Platformer"
@@ -46,9 +40,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
-LAYER_NAME_ENEMIES = "enemies"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
-LAYER_NAME_DOOR = "Next_Level_Door"
 
 class MyGame(arcade.Window):
     """
@@ -83,10 +75,6 @@ class MyGame(arcade.Window):
         # Separate variable that holds the player sprite
         self.mario = None
 
-        self.mario_door = False
-
-        self.mario_flag = False
-
         # Our physics engine
         self.physics_engine = None
 
@@ -94,14 +82,7 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
-        self.enemy_list = []
-
-        # -- sounds --
-        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
-
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
-
-        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
 
         # A Camera that can be used for scrolling the screen
         self.camera = None
@@ -115,12 +96,6 @@ class MyGame(arcade.Window):
         self.jump_key_down = False
         self.down_key_down = False
         self.sprint_key_down = False
-
-        # different levels
-        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
-        self.stage_num = 1
-        self.mario_world = 0
-        self.success_map = False
 
         # background color
         arcade.set_background_color(arcade.color.BLACK)
@@ -162,8 +137,9 @@ class MyGame(arcade.Window):
         # Reset the frame counter
         self.frame_counter = 0
 
-        map_name = self.next_world()
-
+        # Name of map file to load
+        # Can modify this by replacing instances of '1-1' with self.stage
+        map_name = "resources/backgrounds/1-1/world_1-1_pipe_test.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -204,24 +180,13 @@ class MyGame(arcade.Window):
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
             },
-             LAYER_NAME_ENEMIES: {
-                 "use_spatial_hash": True,
-                 #"custom_class": GoombaEnemy,
-                 "enemies": {
-                   "custom_class": Enemy
-                 },
-             },
             LAYER_NAME_FLAG: {
-                "use_spatial_hash": True,
-            },
-            LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
             },
         }
 
-        # Read in the tiled map        
+        # Read in the tiled map
         self.tile_map = arcade.load_tilemap(map_name, TILE_SCALING, layer_options)
-        #self.tile_map = arcade.load_tilemap(f'map{self.level}.tmx', layer_options= layer_options)        
 
         # Initialize Scene with our TileMap, this will automatically add all layers
         # from the map as SpriteLists in the scene in the proper order.
@@ -234,8 +199,7 @@ class MyGame(arcade.Window):
         self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
-        self.enemy_list = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
-
+        
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
 
@@ -256,8 +220,7 @@ class MyGame(arcade.Window):
         
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
-        # door tile
-        self.door = self.tile_map.sprite_lists[LAYER_NAME_DOOR]
+        
         # Set the position of the background
         
         # Calculate the drawing position for the background sprite
@@ -266,38 +229,6 @@ class MyGame(arcade.Window):
         self.background_list[0].set_position(background_draw_x, background_draw_y)
 
         self.end_of_map = self.tile_map.width * GRID_PIXEL_SIZE
-
-        # -- Enemies
-        # for my_object in enemies_layer:
-        #     cartesian = self.tile_map.get_cartesian(
-        #         my_object.shape[0], my_object.shape[1]
-        #     )
-
-        #     #todo: enemy_type== "goomba" might not work!!
-        #     #enemy_type = my_object.properties["type"]
-        #     #if enemy_type == "goomba":
-        #         #enemy = GoombaEnemy()
-        #     #elif enemy_type == "zombie":
-        #         #enemy = ZombieEnemy()
-        #     #else:
-        #         #raise Exception(f"Unknown enemy type {enemy_type}.")
-            
-        #     goomba = GoombaEnemy()
-        #     # Set the initial position of the Goomba
-        #     goomba.center_x = 55  # Set the x-coordinate according to your game's layout
-        #     goomba.center_y = 48  # Set the y-coordinate according to your game's layout
-        #     # Add the Goomba to the appropriate sprite list
-        #     self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
-
-        #     '''
-        #     enemy.center_x = math.floor(
-        #         cartesian[0] * TILE_SCALING * self.tile_map.tile_width
-        #     )
-        #     enemy.center_y = math.floor(
-        #         (cartesian[1] + 1) * (self.tile_map.tile_height * TILE_SCALING)
-        #     )
-        #     '''
-        #     self.scene.add_sprite(LAYER_NAME_ENEMIES, goomba)
 
         # Set up the player, specifically placing it at these coordinates.
         self.mario = Mario(CHARACTER_SCALING)
@@ -311,7 +242,6 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
-        self.success_map = False
 
 
     def on_draw(self):
@@ -346,9 +276,6 @@ class MyGame(arcade.Window):
         # Draw our Scene
         # Draw the platforms
         self.scene.draw(pixelated=True)
-
-        #Todo: Draw the goombas
-
         # Draw the player
         self.mario.draw(pixelated=True)
         
@@ -368,12 +295,6 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        
-        if self.timer <= 0:
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                            SCREEN_WIDTH, SCREEN_HEIGHT,
-                                            self.timeUp)
-    
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -387,9 +308,9 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
-            arcade.play_sound(self.jump_sound)
             
             self.enter_pipe("up")
+            
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
@@ -510,7 +431,7 @@ class MyGame(arcade.Window):
         if self.stage_intro:
             self.frame_counter += 1
             
-            if self.frame_counter == INTRO_FRAME_COUNT or self.success_map:
+            if self.frame_counter == INTRO_FRAME_COUNT:
                 self.stage_intro = False
                 self.setup_part_2()
                 
@@ -531,49 +452,28 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
                 self.player_die()
-                
-        
+            
+
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
 
             # Update Animations
-            if not self.mario_flag:
-                self.scene.update_animation(
-                    delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
-                )
-            else:
-                self.scene.update_animation(
-                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
-                )
+            self.scene.update_animation(
+                delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+            )
 
             # Position the camera
             self.center_camera_to_player()
 
-
             # if get to flagpole
-            if arcade.check_for_collision_with_list(self.mario, self.flag_list):
-                # call animation method
-                self.mario_flag = True
-            else:
-                self.mario_flag = False
+            # if arcade.check_for_collision_with_list(self.mario, self.flag_list):
+                # make animation
+                # self.mario.center_y += -1
 
-            if self.mario_flag:
-                self.mario.slidedown_flag()
-                self.mario_door = True
-
-            if self.mario_door:
-                self.flag_animation()
-
-            self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
-
-            if self.door_hit:
-                self.mario.visible = False
-                
-
-            # See if the coin is touching mario
+            # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
             
 
@@ -584,6 +484,11 @@ class MyGame(arcade.Window):
                 else:
                     self.mario.prev_power()
                 self.coin_count += 1
+                
+                if self.coin_count > 99:
+                    self.lives += 1
+                    self.coin_count = 0
+                
                 # Remove the coin
                 coin.remove_from_sprite_lists()
                 # Play a sound
@@ -595,7 +500,6 @@ class MyGame(arcade.Window):
              
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
-            self.height_multiplier = int(self.mario.power > 0) + 1
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
@@ -612,7 +516,6 @@ class MyGame(arcade.Window):
             
             # Turn that list into a set to eliminate duplicate values
             block_hit_list = set(block_hit_list)
-
             # Later, add a requisite that the mario must be big
             for block in block_hit_list:
                 # Perhaps change this to a call to a function that activates some block_break
@@ -620,40 +523,22 @@ class MyGame(arcade.Window):
                 # Remove the block
                 if self.mario.power > 0:
                     block.remove_from_sprite_lists()
+                    # Play a sound (change to breaking sound)
+                    # arcade.play_sound(self.coin_sound)
                 
                 else:
                     # This means Mario is small, bump the block!
-                    block.update = 0.1
-                    pass
-                
-                # Play a sound (change to breaking sound)
-                # arcade.play_sound(self.coin_sound)
-
-
-            # Define the range of x-coordinates
-            x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
-
-            # Iterate over each x-coordinate in the range
-            for x in x_range:
-                # Call get_sprites_at_point for each x-coordinate
-                enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
-                for enemy in enemy_hit_list:
-                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
-                    enemy.remove_from_sprite_lists()
-
-            #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
-            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?
-            #check if there is anything in the list, if not, 
-            if mario_list:
-                self.player_die()
-
-
+                    self.nudged_blocks_list_set[4].append(block)
+                    # Play a sound (change to nudging sound)
+                    # arcade.play_sound(self.coin_sound)
+            
+            
+            self.nudge_blocks()
 
         else:
-            if not self.mario_flag:
-                # Only update the animation for Mario
-                self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
-                self.do_update = not self.mario.is_growing
+            # Only update the animation for Mario
+            self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
+            self.do_update = not self.mario.is_growing
 
     def nudge_blocks(self):
         # On every few frames, allow the nudged blocks to move
@@ -674,29 +559,10 @@ class MyGame(arcade.Window):
                     # Otherwise, do not put the block back in any nudging list
                     
                 self.nudged_blocks_list_set = temp_nudged_blocks_list_set
-    
-    
-    def flag_animation(self):
-        if self.mario.center_y > SPRITE_PIXEL_SIZE * TILE_SCALING * 4:
-            self.mario.slidedown_flag()
-        else:
-            if not arcade.check_for_collision_with_list(self.mario, self.door):
-                self.mario.walk_to_door()
-            else:
-                self.mario_door = False
-                self.stage_num += 1
-                self.next_world()
-                self.setup_part_2()
 
-
-    def next_world(self):
-        # Name of map file to load
-        self.mario_world = self.stages[self.stage_num]
-        print("stage is: ", self.mario_world)
-        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
-        success_map = True
-        return map_name
-
+    def play_flag_animation(self):
+        pass
+        
         
     def save(self):
         save_file = open(self.save_path, "w")
@@ -711,8 +577,6 @@ class MyGame(arcade.Window):
         
     def player_die(self):
         self.lives -= 1
-        # Can likely put these at the start of setup:
-            # Give a death screen
         
         # Set the timer and position to be safe, so it is not called again
         self.timer = 10
