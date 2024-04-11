@@ -100,7 +100,7 @@ class MyGame(arcade.Window):
         # background color
         arcade.set_background_color(arcade.color.BLACK)
         
-        self.background = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
+        self.stagestart = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
 
         
 
@@ -254,7 +254,7 @@ class MyGame(arcade.Window):
         
         if self.stage_intro:
             
-            arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+            arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.stagestart)
             
             draw_string = f"WORLD  {self.stage}\n\n\t\t{self.lives}"
             
