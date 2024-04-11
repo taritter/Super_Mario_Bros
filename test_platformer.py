@@ -260,7 +260,6 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
         # Make sure that we are supposed to be doing updates
-<<<<<<< HEAD
         #if self.do_update:
         # Jump
         if key == arcade.key.UP or key == arcade.key.W:
@@ -281,27 +280,6 @@ class MyGame(arcade.Window):
         elif key == arcade.key.J:
             self.sprint_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-=======
-        if not self.mario_door:
-            # Jump
-            if key == arcade.key.UP or key == arcade.key.W:
-                self.jump_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-                # Prevents the user from double jumping
-                self.jump_key_down = False
-            # Left
-            elif key == arcade.key.LEFT or key == arcade.key.A:
-                self.left_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-            # Right
-            elif key == arcade.key.RIGHT or key == arcade.key.D:
-                self.right_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
-            # Sprint
-            elif key == arcade.key.J:
-                self.sprint_key_down = True
-                self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
->>>>>>> 3043d4fc35fc888100b3c3fa238cd69726f9febc
 
 
     def on_key_release(self, key, modifiers):
@@ -351,7 +329,7 @@ class MyGame(arcade.Window):
             self.physics_engine.update()
 
             # Update Animations
-            if not self.mario_door:
+            if not self.mario_flag:
                 self.scene.update_animation(
                     delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
                 )
@@ -368,11 +346,14 @@ class MyGame(arcade.Window):
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
                 # call animation method
                 self.mario_flag = True
+            else:
+                self.mario_flag = False
 
             if self.mario_flag:
                 self.mario.slidedown_flag()
                 self.mario_door = True
-            elif self.mario_door and self.mario_flag:
+
+            if self.mario_door:
                 self.flag_animation()
 
             self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
@@ -415,26 +396,16 @@ class MyGame(arcade.Window):
                     # This means Mario is small, bump the block!
                     block.update = 0.1
                     pass
-                
-                # Play a sound (change to breaking sound)
-                # arcade.play_sound(self.coin_sound)
-
         else:
-            if not self.mario_door:
+            if not self.mario_flag:
                 # Only update the animation for Mario
                 self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
                 self.do_update = not self.mario.is_growing
 
 
     def flag_animation(self):
-<<<<<<< HEAD
-        if not arcade.check_for_collision_with_list(self.mario, self.door):
-            self.mario.walk_to_door()
-            self.mario.update_animation()
-=======
         if self.mario.center_y > SPRITE_PIXEL_SIZE * TILE_SCALING * 4:
             self.mario.slidedown_flag()
->>>>>>> 3043d4fc35fc888100b3c3fa238cd69726f9febc
         else:
             if not arcade.check_for_collision_with_list(self.mario, self.door):
                 self.mario.walk_to_door()
