@@ -309,27 +309,27 @@ class MyGame(arcade.Window):
             # Prevents the user from double jumping
             self.jump_key_down = False
             
-            # self.enter_pipe("up")
+            self.enter_pipe("up")
             
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             
-            # self.enter_pipe("left")
+            self.enter_pipe("left")
             
         # Right
         elif key == arcade.key.RIGHT or key == arcade.key.D:
             self.right_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             
-            # self.enter_pipe("right")
+            self.enter_pipe("right")
             
         # Down
         elif key == arcade.key.DOWN or key == arcade.key.S:
             self.down_key_down = True
             
-            # self.enter_pipe("down")
+            self.enter_pipe("down")
             
         # Sprint
         elif key == arcade.key.J:
@@ -354,34 +354,63 @@ class MyGame(arcade.Window):
     def enter_pipe(self, direction):
         "Called for each directional key press, check if there is a pipe to enter, and enter it"
         # Pipe Collision
-        # First, below
-        # print(self.mario.center_x)
         for teleporter in self.teleport_enter_list:
             if direction in teleporter.name:
                 if direction in ["up","down"]:
+                    # TODO: fix vertical checks
                     # Need horizontal checks
                     right_of_pipe = self.mario.center_x > teleporter.shape[0][0] * TILE_SCALING
                     left_of_pipe = self.mario.center_x < teleporter.shape[2][0] * TILE_SCALING
                      
                     if direction == "down":
-                        height_check_below = self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 1
-                        in_pipe_vertical_zone = height_check_below < -teleporter.shape[2][1] * TILE_SCALING
+                        height_check_below = self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5
+                        in_pipe_vertical_zone = height_check_below < SCREEN_HEIGHT + teleporter.shape[0][1] * TILE_SCALING
                     else:
                         # direction will be "up"
-                        height_check_above = self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1
-                        in_pipe_vertical_zone = height_check_above > -teleporter.shape[2][1] * TILE_SCALING
+                        height_check_above = self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5
+                        in_pipe_vertical_zone = height_check_above > SCREEN_HEIGHT + teleporter.shape[2][1] * TILE_SCALING
+                        
+                    
                     if right_of_pipe and left_of_pipe and in_pipe_vertical_zone:
-                        # All conditions met, go throught the pipe 
-                        1/0
+                        # All conditions met, go throught the pipe
+                        self.exit_pipe(teleporter.name[:2])
+                        return
                  
                 elif direction in ["right","left"]:
-                     # Need vertical checks
-                     above_pipe = self.mario.center_y > teleporter.shape[0][1] * TILE_SCALING
-                     below_pipe = self.mario.center_y < teleporter.shape[2][1] * TILE_SCALING
-            
+                    # Need vertical checks
+                    above_pipe = self.mario.center_y > SCREEN_HEIGHT + teleporter.shape[2][1] * TILE_SCALING
+                    below_pipe = self.mario.center_y < SCREEN_HEIGHT + teleporter.shape[0][1] * TILE_SCALING
+                    
+                    # Check to see that the 'activator' pixel is within the left/right bounds
+                    if direction == "left":
+                        right_of_pipe = self.mario.center_x - SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5 > teleporter.shape[0][0] * TILE_SCALING
+                        left_of_pipe = self.mario.center_x - SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 5 < teleporter.shape[2][0] * TILE_SCALING
+                        
+                    else:
+                        right_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 > teleporter.shape[0][0] * TILE_SCALING
+                        left_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 < teleporter.shape[2][0] * TILE_SCALING
                      
-                 # print(teleporter.shape[0][0])
-                 # self.mario.center_x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 1)
+                    if above_pipe and below_pipe and right_of_pipe and left_of_pipe:
+                        self.exit_pipe(teleporter.name[:2])
+                        return
+                     
+            
+    def exit_pipe(self, teleport_id):
+        # TODO: refigure to set the camera so that mario is on the far left
+        # Find output pipe position
+        for teleporter_output in self.teleport_exit_list:
+            # If the identifier characters are present, thats the pair
+            if teleport_id in teleporter_output.name:
+                # Note, in actuality one version would be needed for each direction
+                # as with enter_pipe
+                # However, in the interest of time, I won't do that
+                
+                self.mario.center_x = teleporter_output.shape[2][0] * TILE_SCALING
+                self.mario.center_y = SCREEN_HEIGHT + teleporter_output.shape[0][1] * TILE_SCALING
+                
+                self.screen_center_x = 0
+                self.screen_center_y = 0
+                # self.camera.move_to((self.screen_center_x, self.screen_center_y))
         
 
     def center_camera_to_player(self):
