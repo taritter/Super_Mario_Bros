@@ -2,6 +2,7 @@
 Platformer Template
 """
 import arcade
+import time
 import launch
 import random
 from mario import Mario
@@ -41,6 +42,7 @@ LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
+LAYER_NAME_DOOR = "Next_Level_Door"
 
 class MyGame(arcade.Window):
     """
@@ -75,6 +77,10 @@ class MyGame(arcade.Window):
         # Separate variable that holds the player sprite
         self.mario = None
 
+        self.mario_door = False
+
+        self.mario_flag = False
+
         # Our physics engine
         self.physics_engine = None
 
@@ -82,7 +88,12 @@ class MyGame(arcade.Window):
 
         self.player_list = []
 
+        # -- sounds --
+        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
+
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
+
+        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
 
         # A Camera that can be used for scrolling the screen
         self.camera = None
@@ -95,6 +106,12 @@ class MyGame(arcade.Window):
         self.right_key_down = False
         self.jump_key_down = False
         self.sprint_key_down = False
+
+        # different levels
+        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
+        self.stage_num = 1
+        self.mario_world = 0
+        self.success_map = False
 
         # background color
         arcade.set_background_color(arcade.color.BLACK)
@@ -136,9 +153,7 @@ class MyGame(arcade.Window):
         # Reset the frame counter
         self.frame_counter = 0
 
-        # Name of map file to load
-        # Can modify this by replacing instances of '1-1' with self.stage
-        map_name = "resources/backgrounds/1-1/world_1-1.json"
+        map_name = self.next_world()
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -178,9 +193,12 @@ class MyGame(arcade.Window):
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
             },
+            LAYER_NAME_DOOR: {
+                "use_spatial_hash": True,
+            },
         }
 
-        # Read in the tiled map
+        # Read in the tiled map        
         self.tile_map = arcade.load_tilemap(map_name, TILE_SCALING, layer_options)
 
         # Initialize Scene with our TileMap, this will automatically add all layers
@@ -204,6 +222,9 @@ class MyGame(arcade.Window):
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
 
+        # door tile
+        self.door = self.tile_map.sprite_lists[LAYER_NAME_DOOR]
+
         # Set the position of the background
 
         # Calculate the drawing position for the background sprite
@@ -225,6 +246,7 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
+        self.success_map = False
 
 
     def on_draw(self):
@@ -278,6 +300,12 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
+        
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, SCREEN_HEIGHT,
+                                            self.timeUp)
+    
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -291,6 +319,7 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
+            arcade.play_sound(self.jump_sound)
         # Left
         elif key == arcade.key.LEFT or key == arcade.key.A:
             self.left_key_down = True
@@ -336,7 +365,7 @@ class MyGame(arcade.Window):
         if self.stage_intro:
             self.frame_counter += 1
             
-            if self.frame_counter == INTRO_FRAME_COUNT:
+            if self.frame_counter == INTRO_FRAME_COUNT or self.success_map:
                 self.stage_intro = False
                 self.setup_part_2()
                 
@@ -357,26 +386,47 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE:
                 self.player_die()
-            
-
+                
+        
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
 
             # Update Animations
-            self.scene.update_animation(
-                delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
-            )
+            if not self.mario_flag:
+                self.scene.update_animation(
+                    delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+                )
+            else:
+                self.scene.update_animation(
+                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+                )
 
             # Position the camera
             self.center_camera_to_player()
 
+
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
-                # make animation
-                self.mario.center_y += -1
+                # call animation method
+                self.mario_flag = True
+            else:
+                self.mario_flag = False
+
+            if self.mario_flag:
+                self.mario.slidedown_flag()
+                self.mario_door = True
+
+            if self.mario_door:
+                self.flag_animation()
+
+            self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
+
+            if self.door_hit:
+                self.mario.visible = False
+                
 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
@@ -439,9 +489,10 @@ class MyGame(arcade.Window):
             self.nudge_blocks()
 
         else:
-            # Only update the animation for Mario
-            self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
-            self.do_update = not self.mario.is_growing
+            if not self.mario_flag:
+                # Only update the animation for Mario
+                self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
+                self.do_update = not self.mario.is_growing
 
     def nudge_blocks(self):
         # On every few frames, allow the nudged blocks to move
@@ -462,10 +513,29 @@ class MyGame(arcade.Window):
                     # Otherwise, do not put the block back in any nudging list
                     
                 self.nudged_blocks_list_set = temp_nudged_blocks_list_set
+    
+    
+    def flag_animation(self):
+        if self.mario.center_y > SPRITE_PIXEL_SIZE * TILE_SCALING * 4:
+            self.mario.slidedown_flag()
+        else:
+            if not arcade.check_for_collision_with_list(self.mario, self.door):
+                self.mario.walk_to_door()
+            else:
+                self.mario_door = False
+                self.stage_num += 1
+                self.next_world()
+                self.setup_part_2()
 
-    def play_flag_animation(self):
-        pass
-        
+
+    def next_world(self):
+        # Name of map file to load
+        self.mario_world = self.stages[self.stage_num]
+        print("stage is: ", self.mario_world)
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
+        success_map = True
+        return map_name
+
         
     def save(self):
         save_file = open(self.save_path, "w")
