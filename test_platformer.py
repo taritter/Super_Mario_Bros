@@ -15,6 +15,7 @@ SCREEN_TITLE = "Platformer"
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
 DEFAULT_FONT_SIZE = 25
+INTRO_FRAME_COUNT = 150
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 2.5
@@ -39,6 +40,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
+LAYER_NAME_TELEPORT_EVENT = "Teleport"
 
 class MyGame(arcade.Window):
     """
@@ -96,19 +98,20 @@ class MyGame(arcade.Window):
 
         # background color
         arcade.set_background_color(arcade.color.BLACK)
+        
+        self.background = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
+
+        
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
-        self.do_update = True
-
+        
         # Store the save file, as the player has either died or gotten to
         # a new stage        
         self.save()
         
-        # Initialize the set for handling when blocks are nudged
-        self.nudged_blocks_list_set = ([],[],[],[],[])
-                
-        # Set a timer
+        self.stage_intro = True
+        
         self.timer = 300
         self.frame_counter = 0
         
@@ -118,6 +121,20 @@ class MyGame(arcade.Window):
         
         # Set up the Camera
         self.camera = arcade.Camera(self.width, self.height)
+        
+        player_centered = self.screen_center_x, self.screen_center_y
+
+        self.camera.move_to(player_centered)
+        
+        
+    def setup_part_2(self):
+        
+        self.do_update = True
+        # Initialize the set for handling when blocks are nudged
+        self.nudged_blocks_list_set = ([],[],[],[],[])
+                
+        # Reset the frame counter
+        self.frame_counter = 0
 
         # Name of map file to load
         # Can modify this by replacing instances of '1-1' with self.stage
@@ -212,19 +229,42 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         """Render the screen."""
-
         # Clear the screen to the background color
         self.clear()
-
+        
         # Activate our Camera
         self.camera.use()
-
+        
+        if self.stage_intro:
+            
+            arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
+            
+            draw_string = f"WORLD  {self.stage}\n\n\t\t{self.lives}"
+            
+            self.draw_text()
+            
+            arcade.draw_text(draw_string,
+                             self.screen_center_x,
+                             self.screen_center_y + SCREEN_HEIGHT/2 + 3*DEFAULT_FONT_SIZE,
+                             arcade.color.WHITE,
+                             DEFAULT_FONT_SIZE * 1.5,
+                             multiline = True,
+                             width=SCREEN_WIDTH,
+                             align="center",
+                             font_name="Kenney Pixel")
+            
+            return
+        
+        
         # Draw our Scene
         # Draw the platforms
         self.scene.draw(pixelated=True)
         # Draw the player
         self.mario.draw(pixelated=True)
         
+        self.draw_text()
+        
+    def draw_text(self):
         # Draw the text last, so it goes on top
         # Have to squeeze everything into one text draw, otherwise major lag
         draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage} \t\t {self.timer:03d}"
@@ -238,8 +278,6 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        
-    
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -263,6 +301,10 @@ class MyGame(arcade.Window):
         elif key == arcade.key.J:
             self.sprint_key_down = True
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
+            
+        # Reset
+        elif key == arcade.key.ESCAPE:
+            self.player_die()
 
 
     def on_key_release(self, key, modifiers):
@@ -288,6 +330,16 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
+        # Only display the intro during the intro
+        if self.stage_intro:
+            self.frame_counter += 1
+            
+            if self.frame_counter == INTRO_FRAME_COUNT:
+                self.startup = False
+                self.setup_part_2()
+                
+            return # Early return
+        
         # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
@@ -426,16 +478,19 @@ class MyGame(arcade.Window):
         
     def player_die(self):
         self.lives -= 1
-        # Can likely put these at the start of setup:
-            # Give a death screen
         
-        # Reset the stage
-        self.setup()
+        # Set the timer and position to be safe, so it is not called again
+        self.timer = 10
+        self.mario.set_position(0, 2*SCREEN_HEIGHT)
         
         # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
+        
+        
+        # Reset the stage
+        self.setup()
 
 
 def main():
