@@ -3,8 +3,7 @@
     {
      "export":
         {
-         "format":"json",
-         "target":"world_1-1.json"
+         "format":"json"
         }
     },
  "height":15,
@@ -16,6 +15,40 @@
          "name":"Background",
          "opacity":1,
          "type":"imagelayer",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":13,
+         "name":"enemies",
+         "objects":[
+                {
+                 "gid":925,
+                 "height":16,
+                 "id":20,
+                 "name":"",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":655.5,
+                 "y":208.5
+                }],
+         "opacity":1,
+         "properties":[
+                {
+                 "name":"left_boundary",
+                 "type":"int",
+                 "value":40
+                }, 
+                {
+                 "name":"right_boundary",
+                 "type":"int",
+                 "value":45
+                }],
+         "type":"objectgroup",
          "visible":true,
          "x":0,
          "y":0
@@ -254,8 +287,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":12,
- "nextobjectid":1,
+ "nextlayerid":14,
+ "nextobjectid":21,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
@@ -264,6 +297,10 @@
         {
          "firstgid":1,
          "source":"..\/tileset.tsx"
+        }, 
+        {
+         "firstgid":925,
+         "source":"..\/..\/sprites\/goomba_move.tsx"
         }],
  "tilewidth":16,
  "type":"map",
