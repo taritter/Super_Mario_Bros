@@ -371,7 +371,7 @@ class MyGame(arcade.Window):
                 # make animation
                 self.mario.center_y += -1
 
-            # See if the coin is hitting a platform
+            # See if the coin is touching mario
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
             
 
@@ -408,6 +408,24 @@ class MyGame(arcade.Window):
                 
                 # Play a sound (change to breaking sound)
                 # arcade.play_sound(self.coin_sound)
+
+
+            #enemie collisions
+            enemy_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
+            for enemie in enemy_hit_list:
+                # Perhaps change this to a call to a function that activates some block_break
+                # event at the position of each broken block
+                # Remove the enemie
+                
+                #at the position where the enemy was, put in the new sprite
+                enemie.remove_from_sprite_lists()
+
+            #mushroom kills mario
+            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
+            #check if there is anything in the list, if not, 
+            if mario_list:
+                self.player_die()
+
 
         else:
             # Only update the animation for Mario
