@@ -107,6 +107,12 @@ class MyGame(arcade.Window):
         self.jump_key_down = False
         self.sprint_key_down = False
 
+        # different levels
+        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
+        self.stage_num = 1
+        self.mario_world = 0
+        self.success_map = False
+
         # background color
         arcade.set_background_color(arcade.color.BLACK)
         
@@ -147,11 +153,7 @@ class MyGame(arcade.Window):
         # Reset the frame counter
         self.frame_counter = 0
 
-        # Name of map file to load
-        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
-        self.stage_num = 1
-        self.stage = self.stages[self.stage_num]
-        map_name = f"resources/backgrounds/1-1/world_{self.stage}.json"
+        map_name = self.next_world()
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -196,7 +198,7 @@ class MyGame(arcade.Window):
             },
         }
 
-        # Read in the tiled map
+        # Read in the tiled map        
         self.tile_map = arcade.load_tilemap(map_name, TILE_SCALING, layer_options)
 
         # Initialize Scene with our TileMap, this will automatically add all layers
@@ -244,6 +246,7 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
+        self.success_map = False
 
 
     def on_draw(self):
@@ -360,7 +363,7 @@ class MyGame(arcade.Window):
         if self.stage_intro:
             self.frame_counter += 1
             
-            if self.frame_counter == INTRO_FRAME_COUNT:
+            if self.frame_counter == INTRO_FRAME_COUNT or self.success_map:
                 self.stage_intro = False
                 self.setup_part_2()
                 
@@ -519,6 +522,17 @@ class MyGame(arcade.Window):
             else:
                 self.mario_door = False
                 self.stage_num += 1
+                self.next_world()
+                self.setup_part_2()
+
+
+    def next_world(self):
+        # Name of map file to load
+        self.mario_world = self.stages[self.stage_num]
+        print("stage is: ", self.mario_world)
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
+        success_map = True
+        return map_name
 
         
     def save(self):
