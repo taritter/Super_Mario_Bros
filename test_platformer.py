@@ -282,7 +282,8 @@ class MyGame(arcade.Window):
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
         # Make sure that we are supposed to be doing updates
-        #if self.do_update:
+        if self.stage_intro:
+            return
         # Jump
         if key == arcade.key.UP or key == arcade.key.W:
             self.jump_key_down = True
