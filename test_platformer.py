@@ -7,6 +7,7 @@ import launch
 import random
 from mario import Mario
 import json
+from enemy import Enemy
 from mystery_box import Mystery_Box
 from coin import Coin
 
@@ -41,6 +42,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
+LAYER_NAME_ENEMIES = "enemies"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
 LAYER_NAME_DOOR = "Next_Level_Door"
 
@@ -87,6 +89,8 @@ class MyGame(arcade.Window):
         self.background_list = []
 
         self.player_list = []
+
+        self.enemy_list = []
 
         # -- sounds --
         self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
@@ -193,6 +197,12 @@ class MyGame(arcade.Window):
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
             },
+            LAYER_NAME_ENEMIES: {
+                "use_spatial_hash": True,
+                "enemies": {
+                    "custom_class": Enemy
+                },
+            },
             LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
             },
@@ -212,6 +222,7 @@ class MyGame(arcade.Window):
         self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
+        self.enemy_list = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
 
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
@@ -397,7 +408,7 @@ class MyGame(arcade.Window):
             # Update Animations
             if not self.mario_flag:
                 self.scene.update_animation(
-                    delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+                    delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
                 )
             else:
                 self.scene.update_animation(
@@ -406,7 +417,6 @@ class MyGame(arcade.Window):
 
             # Position the camera
             self.center_camera_to_player()
-
 
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
@@ -452,6 +462,25 @@ class MyGame(arcade.Window):
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
             height_multiplier = int(self.mario.power > 0) + 1
+
+            """--- this is for enemy mario collision"""
+
+            # Define the range of x-coordinates
+            x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
+
+            # Iterate over each x-coordinate in the range
+            for x in x_range:
+                # Call get_sprites_at_point for each x-coordinate
+                enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
+                for enemy in enemy_hit_list:
+                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
+                    enemy.remove_from_sprite_lists()
+
+            #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
+            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?
+            #check if there is anything in the list, if not, 
+            if mario_list:
+                self.player_die()
             
             
             # Note that the multiplier for getting either side of mario's head (0.7)
@@ -532,7 +561,7 @@ class MyGame(arcade.Window):
         # Name of map file to load
         self.mario_world = self.stages[self.stage_num]
         print("stage is: ", self.mario_world)
-        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmj"
         self.success_map = True
         self.stage = self.mario_world
         return map_name
