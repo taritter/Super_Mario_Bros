@@ -284,6 +284,7 @@ class MyGame(arcade.Window):
         # Make sure that we are supposed to be doing updates
         if self.stage_intro:
             return
+        
         # Jump
         if key == arcade.key.UP or key == arcade.key.W:
             self.jump_key_down = True
