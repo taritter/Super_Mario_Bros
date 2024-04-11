@@ -359,10 +359,10 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
 
-        # Update Animations
-        self.scene.update_animation(
-            delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
-        )
+            # Update Animations
+            self.scene.update_animation(
+                delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
+            )
 
             # Position the camera
             self.center_camera_to_player()
