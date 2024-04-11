@@ -15,6 +15,7 @@ SCREEN_TITLE = "Platformer"
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
 DEFAULT_FONT_SIZE = 25
+INTRO_FRAME_COUNT = 150
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 2.5
@@ -108,7 +109,7 @@ class MyGame(arcade.Window):
         # a new stage        
         self.save()
         
-        self.startup = True
+        self.stage_intro = True
         
         self.timer = 300
         self.frame_counter = 0
@@ -233,7 +234,7 @@ class MyGame(arcade.Window):
         # Activate our Camera
         self.camera.use()
         
-        if self.startup:
+        if self.stage_intro:
             
             arcade.draw_lrwh_rectangle_textured(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
             
@@ -328,17 +329,17 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
-        # Make sure that we are supposed to be doing updates
-        
-        if self.startup:
+        # Only display the intro during the intro
+        if self.stage_intro:
             self.frame_counter += 1
             
-            if self.frame_counter == 150:
+            if self.frame_counter == INTRO_FRAME_COUNT:
                 self.startup = False
                 self.setup_part_2()
                 
             return # Early return
         
+        # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
             if self.mario.center_x < self.screen_center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2:
@@ -476,15 +477,17 @@ class MyGame(arcade.Window):
         
     def player_die(self):
         self.lives -= 1
-        # Can likely put these at the start of setup:
-            # Give a death screen
-        self.timer = 1
-        self.mario.set_position(0, SCREEN_HEIGHT)
+        
+        # Set the timer and position to be safe, so it is not called again
+        self.timer = 10
+        self.mario.set_position(0, 2*SCREEN_HEIGHT)
         
         # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
+        
+        
         # Reset the stage
         self.setup()
 
