@@ -63,7 +63,7 @@ class Title_Screen(arcade.View):
         two_player = arcade.gui.UIFlatButton(text="2 PLAYER GAME", width=200, style=dontuse_style)
 
         self.v_box.add(one_player)
-        self.v_box.add(two_player)
+        #self.v_box.add(two_player)
 
         self.manager.add(
             arcade.gui.UIAnchorWidget(
