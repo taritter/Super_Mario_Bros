@@ -7,7 +7,7 @@ import launch
 import random
 from mario import Mario
 from enemy import Enemy
-from enemy import GoombaEnemy
+#from enemy import GoombaEnemy
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
@@ -47,7 +47,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
-LAYER_NAME_ENEMIES = "Goomba"
+LAYER_NAME_ENEMIES = "enemies"
 
 class MyGame(arcade.Window):
     """
@@ -112,6 +112,13 @@ class MyGame(arcade.Window):
         """Set up the game here. Call this function to restart the game."""
         self.do_update = True
 
+        # Store the save file, as the player has either died or gotten to
+        # a new stage        
+        self.save()
+        
+        # Initialize the set for handling when blocks are nudged
+        self.nudged_blocks_list_set = ([],[],[],[],[])
+                
         # Set a timer
         self.timer = 300
         self.frame_counter = 0
@@ -162,16 +169,16 @@ class MyGame(arcade.Window):
             LAYER_NAME_BACKGROUND: {
                 "use_spatial_hash": True,
             },
-             LAYER_NAME_ENEMIES: {
-                 "use_spatial_hash": True,
-                 "custom_class": GoombaEnemy,
-                 #"enemies": {
-                 #  "custom_class": Enemy
-                 #},
+            LAYER_NAME_ENEMIES: {
+                 # "use_spatial_hash": True,
+                 #"custom_class": GoombaEnemy,
+                 "enemies": {
+                   "custom_class": Enemy
+                 },
              },
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
-            },
+            }
         }
 
         # Read in the tiled map
@@ -335,7 +342,6 @@ class MyGame(arcade.Window):
         self.camera.move_to(player_centered)
 
     def on_update(self, delta_time):
-
         # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
@@ -383,6 +389,11 @@ class MyGame(arcade.Window):
                 else:
                     self.mario.prev_power()
                 self.coin_count += 1
+                
+                if self.coin_count > 99:
+                    self.lives += 1
+                    self.coin_count = 0
+                
                 # Remove the coin
                 coin.remove_from_sprite_lists()
                 # Play a sound
@@ -392,8 +403,22 @@ class MyGame(arcade.Window):
             # Testing with breakable blocks first
             height_multiplier = int(self.mario.power > 0) + 1
             
-            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
-
+            
+            # Note that the multiplier for getting either side of mario's head (0.7)
+            # Is just barely smaller than it needs to be - it is possible to
+            # hit the block without it being added to the hit list
+            # However, increasing the value to 0.75 is just barely too much,
+            # and it is possible to hit a block from the side
+            
+            
+            # Git the block list for the left side of mario's head
+            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+            
+            # Add to that list the blocks on the right side of mario's head
+            block_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list))
+            
+            # Turn that list into a set to eliminate duplicate values
+            block_hit_list = set(block_hit_list)
             # Later, add a requisite that the mario must be big
             for block in block_hit_list:
                 # Perhaps change this to a call to a function that activates some block_break
@@ -401,30 +426,52 @@ class MyGame(arcade.Window):
                 # Remove the block
                 if self.mario.power > 0:
                     block.remove_from_sprite_lists()
+                    # Play a sound (change to breaking sound)
+                    # arcade.play_sound(self.coin_sound)
                 
                 else:
                     # This means Mario is small, bump the block!
-                    block.update = 0.1
-                    pass
-                
-                # Play a sound (change to breaking sound)
-                # arcade.play_sound(self.coin_sound)
+                    self.nudged_blocks_list_set[4].append(block)
+                    # Play a sound (change to nudging sound)
+                    # arcade.play_sound(self.coin_sound)
+            
+            
+            self.nudge_blocks()
 
         else:
             # Only update the animation for Mario
             self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
             self.do_update = not self.mario.is_growing
 
+    def nudge_blocks(self):
+        # On every few frames, allow the nudged blocks to move
+        if self.frame_counter % 3 == 0:
+            temp_nudged_blocks_list_set = ([],[],[],[],[])
+            for list_id, nudged_block_list in enumerate(self.nudged_blocks_list_set):
+                for block in nudged_block_list:
+                    # Add the index of the list the block is in, centered around
+                    # the middle list (by subtracting the length less 1, over 2)
+                    # This achieves the effect of going up and down in equal amounts
+                    # The multiplication gives a larger magnitude to the effect
+                    block.center_y += (list_id - 2) * 2
+                    
+                    # If the block is not in the final (lowest)
+                    if list_id-1 >= 0:
+                        # Put the block in a lower list
+                        temp_nudged_blocks_list_set[list_id-1].append(block)
+                    # Otherwise, do not put the block back in any nudging list
+                    
+                self.nudged_blocks_list_set = temp_nudged_blocks_list_set
 
     def play_flag_animation(self):
         pass
 
-
+    """
         #  Goomba movement put logic here
         enemy_hit_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
 
         for enemy in enemy_hit_list:
-            enemy.remove_from_sprite_lists()
+            enemy.remove_from_sprite_lists()"""
 
         
         
@@ -442,11 +489,9 @@ class MyGame(arcade.Window):
     def player_die(self):
         self.lives -= 1
         # Can likely put these at the start of setup:
-            # self.save() 
             # Give a death screen
         
         # Reset the stage
-
         self.setup()
         
         # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
