@@ -500,7 +500,14 @@ class MyGame(arcade.Window):
             # Testing with breakable blocks first
             height_multiplier = int(self.mario.power > 0) + 1
             
-            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+            # Git the block list for the left side of mario's head
+            block_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
+           
+            # Add to that list the blocks on the right side of mario's head
+            block_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list))
+           
+            # Turn that list into a set to eliminate duplicate values
+            block_hit_list = set(block_hit_list)
 
             # Later, add a requisite that the mario must be big
             for block in block_hit_list:
@@ -536,13 +543,6 @@ class MyGame(arcade.Window):
             if mario_list:
                 self.player_die()
 
-
-
-        else:
-            if not self.mario_flag:
-                # Only update the animation for Mario
-                self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
-                self.do_update = not self.mario.is_growing
 
     def nudge_blocks(self):
         # On every few frames, allow the nudged blocks to move
