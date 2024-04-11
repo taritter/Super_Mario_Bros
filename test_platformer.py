@@ -40,6 +40,7 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
+LAYER_NAME_TELEPORT_EVENT = "Teleport"
 
 class MyGame(arcade.Window):
     """
