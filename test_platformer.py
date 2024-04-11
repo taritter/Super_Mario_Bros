@@ -478,14 +478,15 @@ class MyGame(arcade.Window):
         self.lives -= 1
         # Can likely put these at the start of setup:
             # Give a death screen
-        
-        # Reset the stage
-        self.setup()
+        self.timer = 1
+        self.mario.set_position(0, SCREEN_HEIGHT)
         
         # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
         # Ideally, also reset the save file to a default version (save_0.json)
         if self.lives == 0:
             pass
+        # Reset the stage
+        self.setup()
 
 
 def main():
