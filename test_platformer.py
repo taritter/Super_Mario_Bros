@@ -410,21 +410,23 @@ class MyGame(arcade.Window):
                 # arcade.play_sound(self.coin_sound)
 
 
-            #enemie collisions
-            enemy_hit_list = arcade.get_sprites_at_point((self.mario.center_x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
-            for enemie in enemy_hit_list:
-                # Perhaps change this to a call to a function that activates some block_break
-                # event at the position of each broken block
-                # Remove the enemie
-                
-                #at the position where the enemy was, put in the new sprite
-                enemie.remove_from_sprite_lists()
+            # Define the range of x-coordinates
+            x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
 
-            #mushroom kills mario
-            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
+            # Iterate over each x-coordinate in the range
+            for x in x_range:
+                # Call get_sprites_at_point for each x-coordinate
+                enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
+                for enemy in enemy_hit_list:
+                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
+                    enemy.remove_from_sprite_lists()
+
+            #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
+            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?
             #check if there is anything in the list, if not, 
             if mario_list:
                 self.player_die()
+
 
 
         else:
@@ -435,13 +437,6 @@ class MyGame(arcade.Window):
 
     def play_flag_animation(self):
         pass
-
-    """
-        #  Goomba movement put logic here
-        enemy_hit_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list)
-
-        for enemy in enemy_hit_list:
-            enemy.remove_from_sprite_lists()"""
 
         
         
