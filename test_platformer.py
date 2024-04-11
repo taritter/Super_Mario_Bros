@@ -361,7 +361,7 @@ class MyGame(arcade.Window):
             self.frame_counter += 1
             
             if self.frame_counter == INTRO_FRAME_COUNT:
-                self.startup = False
+                self.stage_intro = False
                 self.setup_part_2()
                 
             return # Early return
