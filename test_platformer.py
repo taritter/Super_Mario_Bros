@@ -506,7 +506,7 @@ class MyGame(arcade.Window):
             # Add to that list the blocks on the right side of mario's head
             block_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list))
            
-            # Turn that list into a set to eliminate duplicate values
+            # Turn that list into a set to eliminate duplicate valuesgit 
             block_hit_list = set(block_hit_list)
 
             # Later, add a requisite that the mario must be big
@@ -519,8 +519,7 @@ class MyGame(arcade.Window):
                 
                 else:
                     # This means Mario is small, bump the block!
-                    block.update = 0.1
-                    pass
+                    self.nudged_blocks_list_set[4].append(block)
                 
                 # Play a sound (change to breaking sound)
                 # arcade.play_sound(self.coin_sound)
