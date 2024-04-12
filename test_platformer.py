@@ -94,7 +94,7 @@ class MyGame(arcade.Window):
         self.enemy_list = []
         
         # -- sounds --
-        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
+        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.wav")
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
