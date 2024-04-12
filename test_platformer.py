@@ -2,10 +2,13 @@
 Platformer Template
 """
 import arcade
+
+import time
 import launch
 import random
 from mario import Mario
 import json
+from enemy import Enemy
 from mystery_box import Mystery_Box
 from coin import Coin
 
@@ -97,6 +100,12 @@ class MyGame(arcade.Window):
         self.down_key_down = False
         self.sprint_key_down = False
 
+        # different levels
+        self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
+        self.stage_num = 1
+        self.mario_world = self.stages[self.stage_num]
+        self.success_map = False
+
         # background color
         arcade.set_background_color(arcade.color.BLACK)
         
@@ -181,6 +190,15 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
             LAYER_NAME_FLAG: {
+                "use_spatial_hash": True,
+            },
+            LAYER_NAME_ENEMIES: {
+                "use_spatial_hash": True,
+                "enemies": {
+                    "custom_class": Enemy
+                },
+            },
+            LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
             },
         }
@@ -284,7 +302,7 @@ class MyGame(arcade.Window):
     def draw_text(self):
         # Draw the text last, so it goes on top
         # Have to squeeze everything into one text draw, otherwise major lag
-        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.stage} \t\t {self.timer:03d}"
+        draw_string = f"MARIO \t\t COINS \t\t WORLD \t\t TIME \n{self.score:06d}  \t\t {self.coin_count:02d} \t\t\t   {self.mario_world} \t\t {self.timer:03d}"
         
         arcade.draw_text(draw_string,
                          self.screen_center_x + SCREEN_WIDTH / 10,
@@ -473,6 +491,18 @@ class MyGame(arcade.Window):
                 # make animation
                 # self.mario.center_y += -1
 
+            if self.mario_flag:
+                self.mario.slidedown_flag()
+                self.mario_door = True
+
+            if self.mario_door:
+                self.flag_animation()
+
+            self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
+
+            if self.door_hit:
+                self.mario.visible = False
+                
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
             
@@ -500,6 +530,28 @@ class MyGame(arcade.Window):
              
             # Proof of concept of hitting the above block:
             # Testing with breakable blocks first
+
+            self.height_multiplier = int(self.mario.power > 0) + 1
+
+            """--- this is for enemy mario collision"""
+
+            # Define the range of x-coordinates
+            x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
+
+            # Iterate over each x-coordinate in the range
+            for x in x_range:
+                # Call get_sprites_at_point for each x-coordinate
+                enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
+                for enemy in enemy_hit_list:
+                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
+                    enemy.remove_from_sprite_lists()
+
+            #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
+            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?
+            #check if there is anything in the list, if not, 
+            if mario_list:
+                self.player_die()
+            
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
@@ -559,6 +611,29 @@ class MyGame(arcade.Window):
                     # Otherwise, do not put the block back in any nudging list
                     
                 self.nudged_blocks_list_set = temp_nudged_blocks_list_set
+    
+    def flag_animation(self):
+        if self.mario.center_y > SPRITE_PIXEL_SIZE * TILE_SCALING * 4:
+            self.mario.slidedown_flag()
+        else:
+            if not arcade.check_for_collision_with_list(self.mario, self.door):
+                self.mario.walk_to_door()
+            else:
+                self.mario_door = False
+                self.stage_num += 1
+                self.next_world()
+                self.setup_part_2()
+
+
+    def next_world(self):
+        # Name of map file to load
+        self.mario_world = self.stages[self.stage_num]
+        print("stage is: ", self.mario_world)
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmj"
+        self.success_map = True
+        self.stage = self.mario_world
+        return map_name
+
 
     def play_flag_animation(self):
         pass
