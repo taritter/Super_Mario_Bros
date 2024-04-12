@@ -3,8 +3,8 @@
     {
      "export":
         {
-         "format":"json",
-         "target":"world_1-1.json"
+         "format":"tmx",
+         "target":"world_1-1.tmx"
         }
     },
  "height":15,
@@ -32,14 +32,19 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"left_boundary",
+                         "name":"boundary_left",
                          "type":"int",
-                         "value":637
+                         "value":1592
                         }, 
                         {
-                         "name":"right_boundary",
+                         "name":"boundary_right",
                          "type":"int",
-                         "value":738
+                         "value":1845
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"",
@@ -55,14 +60,19 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"left_boundary",
+                         "name":"boundary_left",
                          "type":"int",
-                         "value":477
+                         "value":1192
                         }, 
                         {
-                         "name":"right_boundary",
+                         "name":"boundary_right",
                          "type":"int",
-                         "value":611
+                         "value":1527
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
                         }],
                  "rotation":0,
                  "type":"",
@@ -70,6 +80,29 @@
                  "width":16,
                  "x":522,
                  "y":208.242424242424
+                }, 
+                {
+                 "gid":925,
+                 "height":16,
+                 "id":22,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":2352
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1069,
+                 "y":209
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -312,7 +345,7 @@
          "y":0
         }],
  "nextlayerid":14,
- "nextobjectid":22,
+ "nextobjectid":23,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",

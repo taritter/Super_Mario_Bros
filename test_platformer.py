@@ -198,10 +198,7 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
             LAYER_NAME_ENEMIES: {
-                "use_spatial_hash": True,
-                "enemies": {
-                    "custom_class": Enemy
-                },
+                "use_spatial_hash": False,
             },
             LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
@@ -256,10 +253,11 @@ class MyGame(arcade.Window):
         # Create the 'physics engine'
         walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.mario, gravity_constant=GRAVITY, walls=walls
+            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=self.scene[LAYER_NAME_ENEMIES],
         )
         self.success_map = False
 
+        
 
     def on_draw(self):
         """Render the screen."""
@@ -402,6 +400,9 @@ class MyGame(arcade.Window):
             # Player dies if they fall below the world or run out of time
             if self.mario.center_y < -SPRITE_PIXEL_SIZE:
                 self.player_die()
+
+            
+            self.scene.update([LAYER_NAME_ENEMIES])
                 
         
             # Player movement and physics engine
@@ -420,6 +421,7 @@ class MyGame(arcade.Window):
 
             # Position the camera
             self.center_camera_to_player()
+
 
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
