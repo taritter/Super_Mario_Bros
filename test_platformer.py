@@ -160,7 +160,7 @@ class MyGame(arcade.Window):
 
         # Name of map file to load
         # Can modify this by replacing instances of '1-1' with self.stage
-        map_name = "resources/backgrounds/1-1/world_1-1.json" #self.next_world()  #"resources/backgrounds/1-1/world_1-1_pipe_test.json" #
+        map_name =  self.next_world()  #"resources/backgrounds/1-1/world_1-1.json" #
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
         # use spatial hashing for detection.
