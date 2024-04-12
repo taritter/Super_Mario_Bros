@@ -43,7 +43,9 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
+LAYER_NAME_ENEMIES = "enemies"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
+LAYER_NAME_DOOR = "Next_Level_Door"
 
 class MyGame(arcade.Window):
     """
@@ -77,6 +79,10 @@ class MyGame(arcade.Window):
 
         # Separate variable that holds the player sprite
         self.mario = None
+        
+        self.mario_door = False
+        
+        self.mario_flag = False
 
         # Our physics engine
         self.physics_engine = None
@@ -84,6 +90,11 @@ class MyGame(arcade.Window):
         self.background_list = []
 
         self.player_list = []
+        
+        self.enemy_list = []
+        
+        # -- sounds --
+        self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.mp3")
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
@@ -148,7 +159,7 @@ class MyGame(arcade.Window):
 
         # Name of map file to load
         # Can modify this by replacing instances of '1-1' with self.stage
-        map_name = "resources/backgrounds/1-1/world_1-1_pipe_test.json"
+        map_name = self.next_world() #"resources/backgrounds/1-1/world_1-1_pipe_test.json"
 
         # Layer specific options are defined based on Layer names in a dictionary
         # Doing this will make the SpriteList for the platforms layer
@@ -218,6 +229,8 @@ class MyGame(arcade.Window):
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
         
+        self.enemy_list = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
+        
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
 
@@ -238,6 +251,9 @@ class MyGame(arcade.Window):
         
         # Set background image
         self.background_list = self.tile_map.sprite_lists[LAYER_NAME_BACKGROUND]
+        
+        # door tile
+        self.door = self.tile_map.sprite_lists[LAYER_NAME_DOOR]
         
         # Set the position of the background
         
@@ -260,6 +276,8 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls
         )
+        
+        self.success_map = False
 
 
     def on_draw(self):
@@ -313,6 +331,11 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
+        
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.timeUp)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
