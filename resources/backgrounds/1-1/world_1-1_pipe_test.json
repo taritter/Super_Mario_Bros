@@ -102,12 +102,6 @@
                  "name":"",
                  "properties":[
                         {
-                         "name":"change_x",
-                         "type":"int",
-                         "value":5
-                        }, 
-                        {
-
                          "name":"left_boundary",
                          "type":"int",
                          "value":477
