@@ -49,6 +49,7 @@ class Coin(arcade.Sprite):
         # Set the initial texture
         self.texture = self.coin_textures[0]
 
+
         # Hit box will be set based on the first image used. If you want to specify
         # a different hit box, you can do it like the code below.
         # set_hit_box = [[-22, -64], [22, -64], [22, 28], [-22, 28]]

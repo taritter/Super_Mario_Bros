@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="1">
- <editorsettings>
-  <export target="1-1/world_1-1.json" format="json"/>
- </editorsettings>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="22">
  <tileset firstgid="1" source="tileset.tsx"/>
+ <tileset firstgid="925" source="../sprites/goomba_move.tsx"/>
  <imagelayer id="2" name="Background">
   <image source="1-1/blank_world_1-1.png" width="3888" height="240"/>
  </imagelayer>
+ <objectgroup id="13" name="enemies">
+  <object id="20" gid="925" x="670.25" y="208.5" width="16" height="16">
+   <properties>
+    <property name="left_boundary" type="int" value="637"/>
+    <property name="right_boundary" type="int" value="738"/>
+   </properties>
+  </object>
+  <object id="21" gid="925" x="522" y="208.242" width="16" height="16">
+   <properties>
+    <property name="left_boundary" type="int" value="477"/>
+    <property name="right_boundary" type="int" value="611"/>
+   </properties>
+  </object>
+ </objectgroup>
  <layer id="9" name="Flag" width="243" height="15">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

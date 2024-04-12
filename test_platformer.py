@@ -4,10 +4,10 @@ Platformer Template
 import arcade
 import time
 import launch
+from enemy import Enemy
 import random
 from mario import Mario
 import json
-from enemy import Enemy
 from mystery_box import Mystery_Box
 from coin import Coin
 
@@ -198,7 +198,7 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
             LAYER_NAME_ENEMIES: {
-                "use_spatial_hash": False,
+                "use_spatial_hash": True,
                 "enemies": {
                     "custom_class": Enemy
                 },
@@ -564,7 +564,7 @@ class MyGame(arcade.Window):
         # Name of map file to load
         self.mario_world = self.stages[self.stage_num]
         print("stage is: ", self.mario_world)
-        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmx"
         self.success_map = True
         self.stage = self.mario_world
         return map_name
