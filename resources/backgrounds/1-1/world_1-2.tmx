@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="164" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="5">
- <editorsettings>
-  <export target="1-2/world_1-2.tmj" format="json"/>
- </editorsettings>
- <tileset firstgid="1" source="tileset.tsx"/>
- <tileset firstgid="925" source="../sprites/goomba_move.tsx"/>
+ <tileset firstgid="1" source="../tileset.tsx"/>
+ <tileset firstgid="925" source="../../sprites/goomba_move.tsx"/>
  <imagelayer id="12" name="Background">
-  <image source="1-2/blank_world_1-2.png" width="2624" height="240"/>
+  <image source="../1-2/blank_world_1-2.png" width="2624" height="240"/>
  </imagelayer>
  <layer id="9" name="Flag" width="164" height="15">
   <data encoding="csv">
