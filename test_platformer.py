@@ -371,8 +371,6 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
-        #self.scene.update([LAYER_NAME_ENEMIES])
-
         # Only display the intro during the intro
         if self.stage_intro:
             self.frame_counter += 1
@@ -478,8 +476,15 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
                 for enemy in enemy_hit_list:
+                    enemy_position = enemy.position
+                    enemy.texture
                     #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
                     enemy.remove_from_sprite_lists()
+                    squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
+                    squished.position = enemy_position
+                    self.enemy_list.append(squished)
+                    # need to make it wait
+                    squished.remove_from_sprite_lists()
 
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
             mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?

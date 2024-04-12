@@ -93,6 +93,11 @@
                          "value":2352
                         }, 
                         {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":2760
+                        }, 
+                        {
                          "name":"change_x",
                          "type":"int",
                          "value":-1
@@ -345,7 +350,7 @@
          "y":0
         }],
  "nextlayerid":14,
- "nextobjectid":23,
+ "nextobjectid":24,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
@@ -358,6 +363,10 @@
         {
          "firstgid":925,
          "source":"..\/..\/sprites\/goomba_move.tsx"
+        }, 
+        {
+         "firstgid":927,
+         "source":"..\/..\/sprites\/enemy_sprite_sheet.tsx"
         }],
  "tilewidth":16,
  "type":"map",

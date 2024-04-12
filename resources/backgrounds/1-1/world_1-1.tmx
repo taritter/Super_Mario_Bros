@@ -23,6 +23,7 @@
   <object id="22" gid="925" x="1069" y="209" width="16" height="16">
    <properties>
     <property name="boundary_left" type="int" value="2352"/>
+    <property name="boundary_right" type="int" value="2760"/>
     <property name="change_x" type="int" value="-1"/>
    </properties>
   </object>
