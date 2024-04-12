@@ -10,7 +10,7 @@ SMALL = 0
 LARGE = 1
 
 # Movement speed of enemy, in pixels per frame
-ENEMY_MOVEMENT_SPEED = 5
+ENEMY_MOVEMENT_SPEED = 100
 
 def load_flipped_images(frames: list[arcade.AnimationKeyframe]) -> list[arcade.AnimationKeyframe]:
     flipped_frames = []
@@ -36,10 +36,10 @@ class Enemy(arcade.AnimatedTimeBasedSprite):
         if self.flipped_frames is None:
             self.unflipped_frames = self.frames[:]
             self.flipped_frames = load_flipped_images(self.frames) #fix this to texture set?
-        if self.center_x >= self.properties['right_boundry']:
+        if self.center_x >= self.properties['right_boundary']:
             self.change_x = -ENEMY_MOVEMENT_SPEED
-        if self.center_y >= self.properties['left_boundry']:
-            self.change_y = ENEMY_MOVEMENT_SPEED
+        if self.center_x <= self.properties['left_boundary']:
+            self.change_x = ENEMY_MOVEMENT_SPEED
         self.update_animation()
         super().update()
     

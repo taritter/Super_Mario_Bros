@@ -198,7 +198,7 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
             LAYER_NAME_ENEMIES: {
-                "use_spatial_hash": True,
+                "use_spatial_hash": False,
                 "enemies": {
                     "custom_class": Enemy
                 },
@@ -250,6 +250,7 @@ class MyGame(arcade.Window):
         self.mario.center_x = 48
         self.mario.center_y = 48
         self.scene.add_sprite(LAYER_NAME_PLAYER, self.mario)
+        self.scene[LAYER_NAME_ENEMIES]
 
         # --- Other stuff
         # Create the 'physics engine'
@@ -372,6 +373,8 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
+        #self.scene.update([LAYER_NAME_ENEMIES])
+
         # Only display the intro during the intro
         if self.stage_intro:
             self.frame_counter += 1
@@ -412,7 +415,7 @@ class MyGame(arcade.Window):
                 )
             else:
                 self.scene.update_animation(
-                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
+                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
                 )
 
             # Position the camera
@@ -463,7 +466,7 @@ class MyGame(arcade.Window):
             # Testing with breakable blocks first
             height_multiplier = int(self.mario.power > 0) + 1
 
-            """--- this is for enemy mario collision"""
+            """---- this is for enemy mario collision -----"""
 
             # Define the range of x-coordinates
             x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
@@ -561,7 +564,7 @@ class MyGame(arcade.Window):
         # Name of map file to load
         self.mario_world = self.stages[self.stage_num]
         print("stage is: ", self.mario_world)
-        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmj"
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.json"
         self.success_map = True
         self.stage = self.mario_world
         return map_name
