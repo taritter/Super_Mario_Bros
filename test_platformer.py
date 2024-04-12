@@ -98,6 +98,7 @@ class MyGame(arcade.Window):
 
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
+        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
         # A Camera that can be used for scrolling the screen
         self.camera = None
 
@@ -349,7 +350,7 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
-            
+            arcade.play_sound(self.jump_sound)
             self.enter_pipe("up")
             
         # Left
@@ -472,7 +473,7 @@ class MyGame(arcade.Window):
         if self.stage_intro:
             self.frame_counter += 1
             
-            if self.frame_counter == INTRO_FRAME_COUNT:
+            if self.frame_counter == INTRO_FRAME_COUNT or self.success_map:
                 self.stage_intro = False
                 self.setup_part_2()
                 
@@ -493,7 +494,7 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE:# or self.timer <= 0:
                 self.player_die()
             
 
@@ -502,17 +503,34 @@ class MyGame(arcade.Window):
             self.physics_engine.update()
 
             # Update Animations
-            self.scene.update_animation(
-                delta_time, [LAYER_NAME_PLAYER, LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS]
-            )
+            if not self.mario_flag:
 
+                self.scene.update_animation(delta_time,
+                                            [LAYER_NAME_PLAYER,
+                                             LAYER_NAME_MYSTERY_COIN,
+                                             LAYER_NAME_MYSTERY_ITEM,
+                                             LAYER_NAME_COINS,
+                                             LAYER_NAME_ENEMIES])
+
+            else:
+
+                self.scene.update_animation(delta_time,
+                                            [LAYER_NAME_MYSTERY_COIN,
+                                             LAYER_NAME_MYSTERY_ITEM,
+                                             LAYER_NAME_COINS])
             # Position the camera
             self.center_camera_to_player()
 
             # if get to flagpole
-            # if arcade.check_for_collision_with_list(self.mario, self.flag_list):
-                # make animation
-                # self.mario.center_y += -1
+            if arcade.check_for_collision_with_list(self.mario, self.flag_list):
+
+                # call animation method
+
+                self.mario_flag = True
+
+            else:
+
+                self.mario_flag = False
 
             if self.mario_flag:
                 self.mario.slidedown_flag()
@@ -612,8 +630,10 @@ class MyGame(arcade.Window):
 
         else:
             # Only update the animation for Mario
-            self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
-            self.do_update = not self.mario.is_growing
+            if not self.mario_flag:
+                # Only update the animation for Mario
+                self.scene.update_animation(delta_time, [LAYER_NAME_PLAYER])
+                self.do_update = not self.mario.is_growing
 
     def nudge_blocks(self):
         # On every few frames, allow the nudged blocks to move
@@ -655,12 +675,7 @@ class MyGame(arcade.Window):
         map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmj"
         self.success_map = True
         self.stage = self.mario_world
-        return map_name
-
-
-    def play_flag_animation(self):
-        pass
-        
+        return map_name        
         
     def save(self):
         save_file = open(self.save_path, "w")
