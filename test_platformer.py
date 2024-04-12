@@ -5,10 +5,10 @@ import arcade
 
 import time
 import launch
+from enemy import Enemy
 import random
 from mario import Mario
 import json
-from enemy import Enemy
 from mystery_box import Mystery_Box
 from coin import Coin
 
@@ -204,10 +204,7 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": True,
             },
             LAYER_NAME_ENEMIES: {
-                "use_spatial_hash": True,
-                "enemies": {
-                    "custom_class": Enemy
-                },
+                "use_spatial_hash": False,
             },
             LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
@@ -269,16 +266,18 @@ class MyGame(arcade.Window):
         self.mario.center_x = 48
         self.mario.center_y = 48
         self.scene.add_sprite(LAYER_NAME_PLAYER, self.mario)
+        self.scene[LAYER_NAME_ENEMIES]
 
         # --- Other stuff
         # Create the 'physics engine'
         walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.mario, gravity_constant=GRAVITY, walls=walls
+            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=self.scene[LAYER_NAME_ENEMIES],
         )
         
         self.success_map = False
 
+        
 
     def on_draw(self):
         """Render the screen."""
@@ -468,6 +467,8 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
+        #self.scene.update([LAYER_NAME_ENEMIES])
+
         # Only display the intro during the intro
         if self.stage_intro:
             self.frame_counter += 1
@@ -496,7 +497,9 @@ class MyGame(arcade.Window):
             if self.mario.center_y < -SPRITE_PIXEL_SIZE:# or self.timer <= 0:
                 self.player_die()
             
-
+            self.scene.update([LAYER_NAME_ENEMIES])
+                
+        
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
@@ -512,6 +515,9 @@ class MyGame(arcade.Window):
                                              LAYER_NAME_ENEMIES])
 
             else:
+                self.scene.update_animation(
+                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
+                )
 
                 self.scene.update_animation(delta_time,
                                             [LAYER_NAME_MYSTERY_COIN,
@@ -519,6 +525,7 @@ class MyGame(arcade.Window):
                                              LAYER_NAME_COINS])
             # Position the camera
             self.center_camera_to_player()
+
 
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
@@ -573,7 +580,7 @@ class MyGame(arcade.Window):
 
             self.height_multiplier = int(self.mario.power > 0) + 1
 
-            """--- this is for enemy mario collision"""
+            """---- this is for enemy mario collision -----"""
 
             # Define the range of x-coordinates
             x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
@@ -671,7 +678,7 @@ class MyGame(arcade.Window):
         # Name of map file to load
         self.mario_world = self.stages[self.stage_num]
         print("stage is: ", self.mario_world)
-        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmj"
+        map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmx"
         self.success_map = True
         self.stage = self.mario_world
         return map_name        

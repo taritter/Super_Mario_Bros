@@ -1,16 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="21">
- <editorsettings>
-  <export format="json"/>
- </editorsettings>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="23">
  <tileset firstgid="1" source="../tileset.tsx"/>
  <tileset firstgid="925" source="../../sprites/goomba_move.tsx"/>
- <objectgroup id="13" name="enemies">
-  <object id="20" gid="925" x="655.5" y="208.5" width="16" height="16"/>
- </objectgroup>
  <imagelayer id="2" name="Background">
   <image source="blank_world_1-1.png" width="3888" height="240"/>
  </imagelayer>
+ <objectgroup id="13" name="enemies">
+  <object id="20" gid="925" x="670.25" y="208.5" width="16" height="16">
+   <properties>
+    <property name="boundary_left" type="int" value="1592"/>
+    <property name="boundary_right" type="int" value="1845"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="21" gid="925" x="522" y="208.242" width="16" height="16">
+   <properties>
+    <property name="boundary_left" type="int" value="1192"/>
+    <property name="boundary_right" type="int" value="1527"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="22" gid="925" x="1069" y="209" width="16" height="16">
+   <properties>
+    <property name="boundary_left" type="int" value="2352"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+ </objectgroup>
  <layer id="9" name="Flag" width="243" height="15">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
