@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="22">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="16" nextobjectid="34">
+ <editorsettings>
+  <export format="tmx"/>
+ </editorsettings>
  <tileset firstgid="1" source="../tileset.tsx"/>
  <tileset firstgid="925" source="../../sprites/goomba_move.tsx"/>
+ <tileset firstgid="928" source="../../sprites/enemy_sprite_sheet.tsx"/>
+ <tileset firstgid="1765" source="../../sprites/koopa_move.tsx"/>
  <imagelayer id="2" name="Background">
   <image source="blank_world_1-1.png" width="3888" height="240"/>
  </imagelayer>
- <objectgroup id="11" name="Teleport">
-  <object id="10" name="p1enterdown" x="920" y="145" width="16" height="13"/>
-  <object id="12" name="p1leavebottom" x="3663" y="25" width="16" height="13"/>
-  <object id="13" name="p2enterright" x="3841" y="179" width="12" height="26"/>
-  <object id="15" name="p2leavetop" x="2616" y="177" width="16" height="13"/>
- </objectgroup>
- <objectgroup id="13" name="enemies">
+ <objectgroup id="13" name="goomba">
   <object id="20" gid="925" x="670.25" y="208.5" width="16" height="16">
    <properties>
     <property name="boundary_left" type="int" value="1592"/>
@@ -33,6 +32,56 @@
     <property name="change_x" type="int" value="-1"/>
    </properties>
   </object>
+ </objectgroup>
+ <objectgroup id="14" name="koopa">
+  <object id="24" gid="1769" x="1637" y="209" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="3562"/>
+    <property name="boundary_right" type="int" value="5360"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="25" gid="1769" x="1663" y="209" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="3562"/>
+    <property name="boundary_right" type="int" value="5360"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="26" gid="1769" x="1689.5" y="209" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="3562"/>
+    <property name="boundary_right" type="int" value="5360"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="27" gid="1769" x="2810.5" y="208" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="6595"/>
+    <property name="boundary_right" type="int" value="7165"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="28" gid="1769" x="2832" y="208" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="6595"/>
+    <property name="boundary_right" type="int" value="7165"/>
+    <property name="change_x" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="33" gid="1769" x="363" y="208" width="16" height="32">
+   <properties>
+    <property name="boundary_left" type="int" value="720"/>
+    <property name="boundary_right" type="int" value="1127"/>
+    <property name="change_x" type="int" value="1"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="15" name="Teleport">
+  <object id="29" name="p1enterdown" x="371.5" y="328.5" width="16" height="13"/>
+  <object id="30" name="p1leavebottom" x="3114.5" y="208.5" width="16" height="13"/>
+  <object id="31" name="p2enterright" x="3292.5" y="362.5" width="12" height="26"/>
+  <object id="32" name="p2leavetop" x="2067.5" y="360.5" width="16" height="13"/>
  </objectgroup>
  <layer id="9" name="Flag" width="243" height="15">
   <data encoding="csv">
