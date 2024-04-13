@@ -41,38 +41,44 @@ class Mystery_Box(arcade.Sprite):
         # --- Load Textures ---
         main_path = "resources/sprites/"
 
-        self.coin_textures = []
-        for i in range(1, 5):
+        self.box_textures = []
+        for i in range(1, 6):
             texture = arcade.load_texture(f"{main_path}mystery_{i}.png")
-            self.coin_textures.append(texture)
+            self.box_textures.append(texture)
 
         # Set the initial texture
-        self.texture = self.coin_textures[0]
+        self.texture = self.box_textures[0]
 
         # Hit box will be set based on the first image used. If you want to specify
         # a different hit box, you can do it like the code below.
         # set_hit_box = [[-22, -64], [22, -64], [22, 28], [-22, 28]]
         self.hit_box = self.texture.hit_box_points
 
+        self.is_hit = False
+
         self.update_counter = 0
 
     def update_animation(self, delta_time: float = 1 / 60):
         
-        if self.update_counter >= 5 and self.update_counter <= 15:
-            if self.cur_texture == 0:
-                self.update_counter += 1
-                return
-            self.cur_texture += 1
-            if self.cur_texture > 3:
-                self.cur_texture = 0
-            self.texture = self.coin_textures[self.cur_texture]
-            self.update_counter = 0
-        elif self.update_counter > 15:
-            self.cur_texture += 1
-            if self.cur_texture > 3:
-                self.cur_texture = 0
-            self.texture = self.coin_textures[self.cur_texture]
-            self.update_counter = 0
+        if not self.is_hit:
+            if self.update_counter >= 5 and self.update_counter <= 15:
+                if self.cur_texture == 0:
+                    self.update_counter += 1
+                    return
+                self.cur_texture += 1
+                if self.cur_texture > 3:
+                    self.cur_texture = 0
+                self.texture = self.box_textures[self.cur_texture]
+                self.update_counter = 0
+            elif self.update_counter > 15:
+                self.cur_texture += 1
+                if self.cur_texture > 3:
+                    self.cur_texture = 0
+                self.texture = self.box_textures[self.cur_texture]
+                self.update_counter = 0
+        else:
+            self.cur_texture = 4
+            self.texture = self.box_textures[self.cur_texture]
         
         # Update our counter
         self.update_counter += 1

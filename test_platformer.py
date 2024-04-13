@@ -348,7 +348,8 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
-            arcade.play_sound(self.jump_sound)
+            if self.physics_engine.can_jump:
+                arcade.play_sound(self.jump_sound, volume=0.05)
             self.enter_pipe("up")
             
         # Left
@@ -555,11 +556,6 @@ class MyGame(arcade.Window):
             
 
             for coin in coin_hit_list:
-                self.do_update = False
-                if self.mario.power == 0:
-                    self.mario.next_power()
-                else:
-                    self.mario.prev_power()
                 self.coin_count += 1
                 
                 if self.coin_count > 99:
@@ -569,7 +565,7 @@ class MyGame(arcade.Window):
                 # Remove the coin
                 coin.remove_from_sprite_lists()
                 # Play a sound
-                arcade.play_sound(self.coin_sound)
+                arcade.play_sound(self.coin_sound, volume = 2)
                 
                 
             # Need for both breaking blocks and pipes above/below mario
@@ -630,7 +626,35 @@ class MyGame(arcade.Window):
                     self.nudged_blocks_list_set[4].append(block)
                     # Play a sound (change to nudging sound)
                     # arcade.play_sound(self.coin_sound)
+
+            # Git the block list for the left side of mario's head
+            mystery_coin_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_coin_list)
             
+            # Add to that list the blocks on the right side of mario's head
+            mystery_coin_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_coin_list))
+            
+            # Turn that list into a set to eliminate duplicate values
+            mystery_coin_hit_list = set(mystery_coin_hit_list)
+
+            for block in mystery_coin_hit_list:
+                if not block.is_hit:
+                    self.coin_count += 1
+                    block.is_hit = True
+                    arcade.play_sound(self.coin_sound, volume = 2)
+
+             # Git the block list for the left side of mario's head
+            mystery_item_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_item_list)
+            
+            # Add to that list the blocks on the right side of mario's head
+            mystery_item_hit_list.extend(arcade.get_sprites_at_point((self.mario.center_x + 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_item_list))
+            
+            # Turn that list into a set to eliminate duplicate values
+            mystery_item_hit_list = set(mystery_item_hit_list)
+
+            for block in mystery_item_hit_list:
+                if not block.is_hit:
+                    block.is_hit = True
+
             
             self.nudge_blocks()
 
