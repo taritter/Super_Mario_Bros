@@ -24,6 +24,7 @@ INTRO_FRAME_COUNT = 150
 CHARACTER_SCALING = 2.5
 TILE_SCALING = 2.5
 SPRITE_PIXEL_SIZE = 16
+KOOPA_PIXEL_SIZE = 32
 GRID_PIXEL_SIZE = SPRITE_PIXEL_SIZE * TILE_SCALING
 NUMBER_OF_COINS = 3
 
@@ -43,7 +44,8 @@ LAYER_NAME_COINS = "Coins"
 LAYER_NAME_BACKGROUND = "Background"
 LAYER_NAME_PLAYER = "Player"
 LAYER_NAME_FLAG = "Flag"
-LAYER_NAME_ENEMIES = "enemies"
+LAYER_NAME_GOOMBA = "goomba"
+LAYER_NAME_KOOPA = "koopa"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
 LAYER_NAME_DOOR = "Next_Level_Door"
 
@@ -91,7 +93,9 @@ class MyGame(arcade.Window):
 
         self.player_list = []
         
-        self.enemy_list = []
+        self.goomba_list = []
+
+        self.koopa_list = []
         
         # -- sounds --
         self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.wav")
@@ -203,8 +207,12 @@ class MyGame(arcade.Window):
             LAYER_NAME_FLAG: {
                 "use_spatial_hash": True,
             },
-            LAYER_NAME_ENEMIES: {
+            LAYER_NAME_GOOMBA: {
                 "use_spatial_hash": False,
+            },
+            LAYER_NAME_KOOPA: {
+                "use_spatial_hash": False,
+                "custom_class": Enemy
             },
             LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
@@ -226,7 +234,8 @@ class MyGame(arcade.Window):
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
         
-        self.enemy_list = self.tile_map.sprite_lists[LAYER_NAME_ENEMIES]
+        self.goomba_list = self.tile_map.sprite_lists[LAYER_NAME_GOOMBA]
+        self.koopa_list = self.tile_map.sprite_lists[LAYER_NAME_KOOPA]
         
         # Set coins
         self.coin_list = self.tile_map.sprite_lists[LAYER_NAME_COINS]
@@ -266,13 +275,14 @@ class MyGame(arcade.Window):
         self.mario.center_x = 48
         self.mario.center_y = 48
         self.scene.add_sprite(LAYER_NAME_PLAYER, self.mario)
-        self.scene[LAYER_NAME_ENEMIES]
+        self.scene[LAYER_NAME_GOOMBA]
+        self.scene[LAYER_NAME_KOOPA]
 
         # --- Other stuff
         # Create the 'physics engine'
         walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=self.scene[LAYER_NAME_ENEMIES],
+            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=self.scene[LAYER_NAME_GOOMBA], enemies=self.scene[LAYER_NAME_KOOPA]
         )
         
         self.success_map = False
@@ -468,8 +478,6 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
-        #self.scene.update([LAYER_NAME_ENEMIES])
-
         # Only display the intro during the intro
         if self.stage_intro:
             self.frame_counter += 1
@@ -498,7 +506,8 @@ class MyGame(arcade.Window):
             if self.mario.center_y < -SPRITE_PIXEL_SIZE:# or self.timer <= 0:
                 self.player_die()
             
-            self.scene.update([LAYER_NAME_ENEMIES])
+            self.scene.update([LAYER_NAME_GOOMBA])
+            self.scene.update([LAYER_NAME_KOOPA])
                 
         
             # Player movement and physics engine
@@ -513,11 +522,12 @@ class MyGame(arcade.Window):
                                              LAYER_NAME_MYSTERY_COIN,
                                              LAYER_NAME_MYSTERY_ITEM,
                                              LAYER_NAME_COINS,
-                                             LAYER_NAME_ENEMIES])
+                                             LAYER_NAME_GOOMBA,
+                                             LAYER_NAME_KOOPA])
 
             else:
                 self.scene.update_animation(
-                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_ENEMIES]
+                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_GOOMBA, LAYER_NAME_KOOPA]
                 )
 
                 self.scene.update_animation(delta_time,
@@ -576,21 +586,64 @@ class MyGame(arcade.Window):
 
             self.height_multiplier = int(self.mario.power > 0) + 1
 
-            """---- this is for enemy mario collision -----"""
+            """---- this is for KOOPA mario collision -----
+            if koopa jumped on turns into shell that mario can collect"""
 
             # Define the range of x-coordinates
             x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
 
+            
             # Iterate over each x-coordinate in the range
             for x in x_range:
+                is_hit = False
                 # Call get_sprites_at_point for each x-coordinate
-                enemy_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.enemy_list)
-                for enemy in enemy_hit_list:
-                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
-                    enemy.remove_from_sprite_lists()
+                koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
+                for koopa in koopa_hit_list:
+                    enemy_position = koopa.position
+                    # creates a new enemy object with the shell instead
+                    koopa.remove_from_sprite_lists()
+                    k_shell = Enemy("resources/sprites/koopa_shell.png")
+                    k_shell.hit = True
+                    k_shell.position = enemy_position
+                    k_shell.center_y = 100
 
+                    if self.mario.collides_with_sprite(k_shell) and not is_hit:                        
+                        self.mario.change_y = 5
+                        is_hit = True
+
+
+            """---- this is for GOOMBA collision ----
+            if goomba is jumped on changes to squished image"""
+
+
+            # Define the range of x-coordinates
+            x_range = range(int(self.mario.center_x) - 16, int(self.mario.center_x) + 17)  # Extend range by 1 to include both end points
+
+            
+            # Iterate over each x-coordinate in the range
+            for x in x_range:
+                is_squished = False
+                # Call get_sprites_at_point for each x-coordinate
+                goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
+                for goomba in goomba_hit_list:
+                    enemy_position = goomba.position
+                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
+                    goomba.remove_from_sprite_lists()
+                    squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
+                    squished.position = enemy_position
+                    squished.center_y = 90
+                    self.goomba_list.append(squished)
+
+                    goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
+                    # does squished
+                    if squished in goomba_hit_list and not is_squished:
+                        self.mario.change_y = 3
+                        squished.remove_from_sprite_lists()
+                        is_squished = True
+
+                        
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
-            mario_list = arcade.check_for_collision_with_list(self.mario, self.enemy_list) #change ot enemy_hit_list?
+            mario_list = arcade.check_for_collision_with_list(self.mario, self.goomba_list) #change ot enemy_hit_list?
             #check if there is anything in the list, if not, 
             if mario_list:
                 self.player_die()
@@ -601,7 +654,6 @@ class MyGame(arcade.Window):
             # hit the block without it being added to the hit list
             # However, increasing the value to 0.75 is just barely too much,
             # and it is possible to hit a block from the side
-            
             
             # Git the block list for the left side of mario's head
             block_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.platform_breakable_list)
@@ -696,6 +748,7 @@ class MyGame(arcade.Window):
                 self.stage_num += 1
                 self.next_world()
                 self.setup_part_2()
+    
 
 
     def next_world(self):
