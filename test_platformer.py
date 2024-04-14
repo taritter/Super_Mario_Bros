@@ -493,7 +493,7 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE:# or self.timer <= 0:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
                 self.player_die()
             
 
