@@ -11,6 +11,7 @@ from mario import Mario
 import json
 from mystery_box import Mystery_Box
 from coin import Coin
+from mushroom import Mushroom
 
 # --- Constants
 SCREEN_TITLE = "Platformer"
@@ -49,6 +50,7 @@ LAYER_NAME_KOOPA = "Koopa"
 LAYER_NAME_TELEPORT_EVENT = "Teleport"
 LAYER_NAME_DOOR = "Next_Level_Door"
 LAYER_NAME_FLAG_BOTTOM = "Flag_Bottom"
+LAYER_NAME_MUSHROOM = "Mushroom"
 
 class MyGame(arcade.Window):
     """
@@ -110,6 +112,8 @@ class MyGame(arcade.Window):
         self.break_sound = arcade.load_sound("resources/sounds/Break.wav")
         
         self.squish_sound = arcade.load_sound("resources/sounds/Squish.wav")
+
+        self.powerup_sound = arcade.load_sound("resources/sounds/powerup.wav")
 
 
         self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
@@ -224,6 +228,11 @@ class MyGame(arcade.Window):
                 "use_spatial_hash": False,
                 "custom_class": Koopa
             },
+            LAYER_NAME_MUSHROOM: {
+                "use_spatial_hash": False,
+                "hit_box_algorithm": "None",
+                "custom_class": Mushroom
+            },
             LAYER_NAME_DOOR: {
                 "use_spatial_hash": True,
             },
@@ -256,6 +265,9 @@ class MyGame(arcade.Window):
         # flag tiles
         self.flag_list = self.tile_map.sprite_lists[LAYER_NAME_FLAG]
         self.flag_bottom_list = self.tile_map.sprite_lists[LAYER_NAME_FLAG_BOTTOM]
+
+        # Powerups
+        self.mushroom_list = self.tile_map.sprite_lists[LAYER_NAME_MUSHROOM]
         
         # teleport locations
         full_teleport_list = self.tile_map.object_lists[LAYER_NAME_TELEPORT_EVENT]
@@ -298,6 +310,7 @@ class MyGame(arcade.Window):
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls, platforms=[self.goomba_list, self.koopa_list]
         )
+        self.physics_engine_list = []
         
         self.success_map = False
 
@@ -522,11 +535,15 @@ class MyGame(arcade.Window):
             
             self.scene.update([LAYER_NAME_GOOMBA])
             self.scene.update([LAYER_NAME_KOOPA])
+            self.scene.update([LAYER_NAME_MUSHROOM])
                 
         
             # Player movement and physics engine
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             self.physics_engine.update()
+            for engine in self.physics_engine_list:
+                engine.update()
+                
 
             # Update Animations
             if not self.mario_flag:
@@ -537,11 +554,12 @@ class MyGame(arcade.Window):
                                              LAYER_NAME_MYSTERY_ITEM,
                                              LAYER_NAME_COINS,
                                              LAYER_NAME_GOOMBA,
-                                             LAYER_NAME_KOOPA])
+                                             LAYER_NAME_KOOPA,
+                                             LAYER_NAME_MUSHROOM])
 
             else:
                 self.scene.update_animation(
-                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_GOOMBA, LAYER_NAME_KOOPA]
+                    delta_time, [LAYER_NAME_MYSTERY_COIN, LAYER_NAME_MYSTERY_ITEM, LAYER_NAME_COINS, LAYER_NAME_GOOMBA, LAYER_NAME_KOOPA, LAYER_NAME_MUSHROOM]
                 )
 
                 self.scene.update_animation(delta_time,
@@ -715,7 +733,7 @@ class MyGame(arcade.Window):
                     block.is_hit = True
                     arcade.play_sound(self.coin_sound, volume = 2)
 
-             # Git the block list for the left side of mario's head
+            # Get the block list for the left side of mario's head
             mystery_item_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_item_list)
             
             # Add to that list the blocks on the right side of mario's head
@@ -724,11 +742,28 @@ class MyGame(arcade.Window):
             # Turn that list into a set to eliminate duplicate values
             mystery_item_hit_list = set(mystery_item_hit_list)
 
-            for block in mystery_item_hit_list:
-                if not block.is_hit:
-                    block.is_hit = True
-
+            for box in mystery_item_hit_list:
+                if not box.is_hit:
+                    box.is_hit = True
+                    for shroom in self.mushroom_list:
+                        if box.collides_with_sprite(shroom) and not shroom.is_hit: 
+                            shroom.is_hit = True
+                            walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+                            self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
             
+            
+            # See if the mario collected a mushroom powerur
+            mushroom_hit_list = arcade.check_for_collision_with_list(self.mario, self.mushroom_list)
+            
+            for shroom in mushroom_hit_list:
+                self.mario.next_power()
+
+                # Remove the mushroom
+                shroom.remove_from_sprite_lists()
+
+                # Play a sound
+                arcade.play_sound(self.powerup_sound, volume = 2)
+
             self.nudge_blocks()
 
         else:
