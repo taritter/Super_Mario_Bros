@@ -95,6 +95,8 @@ class MyGame(arcade.Window):
 
         self.add_to_score = False
 
+        self.quest_bool = False
+
         self.current_time = []
 
         self.add_num = 0
@@ -165,7 +167,7 @@ class MyGame(arcade.Window):
         self.do_update = False
         self.stage_intro = True
         
-        self.timer = 5
+        self.timer = 300
         self.frame_counter = 0
         
         # Reset the 'center' of the screen to 0
@@ -617,11 +619,10 @@ class MyGame(arcade.Window):
 
             if self.door_hit and not self.last_level:
                 self.mario.visible = False
-            else:
-                # show you win screen
-                arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.quest_over)
+            elif not self.door_hit and self.last_level:
+                self.quest_bool = True
+
+                
                 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
@@ -661,16 +662,13 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
-                    self.current_time = []
-                    enemy_position = koopa.position
                     # creates a new enemy object with the shell instead
                     koopa.remove_from_sprite_lists()
                     k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
-                    k_shell.position = enemy_position
                     k_shell.boundary_left = koopa.boundary_left
                     k_shell.boundary_right = koopa.boundary_right
 
-                    offset_distance = 30  # Adjust this value as needed
+                    offset_distance = 30
                     if self.mario.change_x >= 0 and not new_sprite:
                         k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 40)
                     elif self.mario.change_x < 0 and not new_sprite:
@@ -681,18 +679,11 @@ class MyGame(arcade.Window):
                     if k_shell in self.koopa_list:
                         new_sprite = True
 
-                    if new_sprite:
-                        self.update_score(100)
-                    
-                    if self.mario.collides_with_sprite(k_shell) and self.mario.power == 0:    
+                    if self.mario.collides_with_sprite(k_shell):   
+                        print("collide with shell")
                         self.mario.change_y = 3
                         k_shell.remove_from_sprite_lists()
-                    elif self.mario.collides_with_sprite(k_shell) and self.mario.power == 1 and self.grab_shell:
-                        k_shell.remove_from_sprite_lists()
-                    elif 0 <= k_shell.center_x <= SCREEN_WIDTH:
-                        k_shell.remove_from_sprite_lists()
-                    # elif not self.is_sprite_on_screen(k_shell):
-                    #     k_shell.remove_from_sprite_lists()
+                        self.update_score(100)
 
 
             """---- this is for GOOMBA collision ----
@@ -704,36 +695,35 @@ class MyGame(arcade.Window):
             
             # Iterate over each x-coordinate in the range
             for x in x_range:
-                is_squished = False
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                 for goomba in goomba_hit_list:
                     # make a animation that displays score
-                    self.update_score(100)
-                    arcade.play_sound(self.squish_sound)
                     enemy_position = goomba.position
                     goomba.remove_from_sprite_lists()
                     squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
                     squished.position = enemy_position
                     if self.mario.power == 0:
                         squished.center_y = self.mario.center_y - 50
-                    else:
+                    elif self.mario.power == 1:
                         squished.center_y = self.mario.center_y - 70
                     self.goomba_list.append(squished)
 
                     goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                     # does squished
-                    if squished in goomba_hit_list and not is_squished:
+                    if squished in goomba_hit_list:
+                        arcade.play_sound(self.squish_sound)
                         self.mario.change_y = 3
                         squished.remove_from_sprite_lists()
-                        is_squished = True
+                        self.update_score(100)
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
             mario_glist = arcade.check_for_collision_with_list(self.mario, self.goomba_list) #change ot enemy_hit_list?
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
-            if mario_glist or mario_klist and self.mario.power == 0:
+            if mario_glist or mario_klist:
+                print("die")
                 self.player_die()
             
             # Note that the multiplier for getting either side of mario's head (0.7)
