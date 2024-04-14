@@ -573,10 +573,13 @@ class MyGame(arcade.Window):
             # he's below the screen
             self.frame_counter += 1
             
+            # Pause for around 20 frames
             if self.frame_counter > 20:
+                # Go up for 20 frames, and then go down
                 self.defeated.center_y += (40 - self.frame_counter) / 2           
                 
-                if self.defeated.center_y < -10:
+                # Once below the map, reset
+                if self.defeated.center_y < -25:
                     self.setup()
                 
             return # Early return
