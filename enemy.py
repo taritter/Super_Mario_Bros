@@ -32,6 +32,7 @@ class Koopa(arcade.AnimatedTimeBasedSprite):
 
         self.hit = False
         if filename == "resources/sprites/koopa_shell.png":
+            print("loading shells")
             self.shell = arcade.load_texture(filename)
             self.shell_frame = [arcade.AnimationKeyframe(0, 200, self.shell)]
 
@@ -45,9 +46,5 @@ class Koopa(arcade.AnimatedTimeBasedSprite):
             self.frames = self.r_frames
         elif self.change_x > 0 and not self.hit:
             self.frames = self.l_frames
-        elif self.hit:
-            print("collision")
-            self.change_x = 3
-            self.frames = self.shell_frame
         
         super().update_animation()

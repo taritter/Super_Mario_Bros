@@ -37,8 +37,6 @@ PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
 
 LAYER_NAME_PLATFORMS = "Platforms"
 LAYER_NAME_PLATFORMS_BREAKABLE = "Platform_Breakable"
-LAYER_NAME_PLATFORMS_COINS = "Platform_Coin"
-LAYER_NAME_PLATFORMS_ITEM = "Platform_Item"
 LAYER_NAME_MYSTERY_ITEM = "Mystery_Item"
 LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
 LAYER_NAME_COINS = "Coins"
@@ -85,6 +83,7 @@ class MyGame(arcade.Window):
         # Separate variable that holds the player sprite
         self.mario = None
 
+
         # for level ending
         
         self.mario_door = False
@@ -94,6 +93,12 @@ class MyGame(arcade.Window):
         self.mario_flag_bottom = False
 
         self.last_level = False
+
+        self.add_to_score = False
+
+        self.current_time = []
+
+        self.add_num = 0
 
         # Our physics engine
         self.physics_engine = None
@@ -140,6 +145,7 @@ class MyGame(arcade.Window):
         self.jump_key_down = False
         self.down_key_down = False
         self.sprint_key_down = False
+        self.grab_shell = False
 
         # different levels
         self.stages = {1: "1-1", 2: "1-2", 3: "1-3", 4: "1-4", 5: "2-1", 6: "2-2", 7: "2-3", 8: "2-4"}
@@ -158,6 +164,8 @@ class MyGame(arcade.Window):
 
         self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
 
+        self.game_over = arcade.load_texture("resources/backgrounds/game_over.png")
+
         
 
     def setup(self):
@@ -172,7 +180,20 @@ class MyGame(arcade.Window):
         self.is_defeated = False
         self.end_of_level = False
 
+        # for level ending
+        
+        self.mario_door = False
+        
+        self.mario_flag = False
+
+        self.mario_flag_bottom = False
+
+        self.last_level = False
+        
+        self.do_update = True
+
         self.timer = 300
+
         self.frame_counter = 0
         
         # Reset the 'center' of the screen to 0
@@ -187,8 +208,7 @@ class MyGame(arcade.Window):
         self.camera.move_to(player_centered)
         
     def setup_part_2(self):
-        
-        self.do_update = True
+
         # Initialize the set for handling when blocks are nudged
         self.nudged_blocks_list_set = ([],[],[],[],[])
                 
@@ -211,14 +231,6 @@ class MyGame(arcade.Window):
                 "hit_box_algorithm": "None",
             },
             LAYER_NAME_PLATFORMS_BREAKABLE: {
-                "use_spatial_hash": True,
-                "hit_box_algorithm": "None",
-            },
-            LAYER_NAME_PLATFORMS_COINS: {
-                "use_spatial_hash": True,
-                "hit_box_algorithm": "None",
-            },
-            LAYER_NAME_PLATFORMS_ITEM: {
                 "use_spatial_hash": True,
                 "hit_box_algorithm": "None",
             },
@@ -270,8 +282,6 @@ class MyGame(arcade.Window):
         # Set platforms
         self.platform_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS]
         self.platform_breakable_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_BREAKABLE]
-        self.platform_coin_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_COINS]
-        self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
         
@@ -326,7 +336,7 @@ class MyGame(arcade.Window):
 
         # --- Other stuff
         # Create the 'physics engine'
-        walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+        walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls, platforms=[self.goomba_list, self.koopa_list]
         )
@@ -365,6 +375,26 @@ class MyGame(arcade.Window):
                              font_name="Kenney Pixel")
             
             return
+
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.timeUp)
+            
+        if self.lives <= 0:
+            # no more lives
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.game_over)
+        if self.add_to_score:
+            arcade.draw_text(str(self.add_num),
+                         self.mario.center_x + 5,
+                         self.mario.center_y + 5,
+                         arcade.color.WHITE,
+                         DEFAULT_FONT_SIZE,
+                         width=SCREEN_WIDTH,
+                         align="center",
+                         font_name="Kenney Pixel")
         
         
         # Draw our Scene
@@ -390,10 +420,6 @@ class MyGame(arcade.Window):
                          align="left",
                          font_name="Kenney Pixel")
         
-        if self.timer <= 0:
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.timeUp)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -439,6 +465,11 @@ class MyGame(arcade.Window):
         # Reset
         elif key == arcade.key.ESCAPE:
             self.player_die()
+
+
+        # Grab Shell if big
+        elif key == arcade.key.G:
+            self.grab_shell = True
 
 
     def on_key_release(self, key, modifiers):
@@ -584,7 +615,6 @@ class MyGame(arcade.Window):
 
             # Update Animations
             if not self.mario_flag:
-
                 self.scene.update_animation(delta_time,
                                             [LAYER_NAME_PLAYER,
                                              LAYER_NAME_MYSTERY_COIN,
@@ -670,7 +700,7 @@ class MyGame(arcade.Window):
             
             # Iterate over each x-coordinate in the range
             for x in x_range:
-                is_hit = False
+                new_sprite = False
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
@@ -679,15 +709,34 @@ class MyGame(arcade.Window):
                     enemy_position = koopa.position
                     # creates a new enemy object with the shell instead
                     koopa.remove_from_sprite_lists()
-                    k_shell = Koopa("resources/sprites/koopa_shell.png")
-                    k_shell.hit = True
+                    k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
                     k_shell.position = enemy_position
-                    k_shell.center_y = 200
+                    k_shell.boundary_left = koopa.boundary_left
+                    k_shell.boundary_right = koopa.boundary_right
 
-                    if self.mario.collides_with_sprite(k_shell) and not is_hit:                        
-                        self.mario.change_y = 5
-                        is_hit = True
-                        k_shell.hit = False
+                    offset_distance = 30  # Adjust this value as needed
+                    if self.mario.change_x >= 0 and not new_sprite:
+                        k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 40)
+                    elif self.mario.change_x < 0 and not new_sprite:
+                        k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 40)
+
+                    k_shell.change_x = 3
+                    self.koopa_list.append(k_shell)
+                    if k_shell in self.koopa_list:
+                        new_sprite = True
+
+                    if new_sprite:
+                        self.update_score(100)
+                    
+                    if self.mario.collides_with_sprite(k_shell) and self.mario.power == 0:    
+                        self.mario.change_y = 3
+                        k_shell.remove_from_sprite_lists()
+                    elif self.mario.collides_with_sprite(k_shell) and self.mario.power == 1 and self.grab_shell:
+                        k_shell.remove_from_sprite_lists()
+                    elif 0 <= k_shell.center_x <= SCREEN_WIDTH:
+                        k_shell.remove_from_sprite_lists()
+                    # elif not self.is_sprite_on_screen(k_shell):
+                    #     k_shell.remove_from_sprite_lists()
 
 
             """---- this is for GOOMBA collision ----
@@ -707,12 +756,14 @@ class MyGame(arcade.Window):
                     self.update_score(100)
                     arcade.play_sound(self.squish_sound)
                     enemy_position = goomba.position
-                    #todo: at the position where the enemy was, put in the new sprite #get_sprite_at_point
                     goomba.remove_from_sprite_lists()
                     squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
                     
                     squished.position = enemy_position
-                    squished.center_y = self.mario.center_y - 50
+                    if self.mario.power == 0:
+                        squished.center_y = self.mario.center_y - 50
+                    else:
+                        squished.center_y = self.mario.center_y - 70
                     self.goomba_list.append(squished)
 
                     goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
@@ -727,7 +778,7 @@ class MyGame(arcade.Window):
             mario_glist = arcade.check_for_collision_with_list(self.mario, self.goomba_list) #change ot enemy_hit_list?
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
-            if mario_glist or mario_klist:
+            if mario_glist or mario_klist and self.mario.power == 0:
                 self.player_die()
             
             # Note that the multiplier for getting either side of mario's head (0.7)
@@ -791,7 +842,7 @@ class MyGame(arcade.Window):
                     for shroom in self.mushroom_list:
                         if box.collides_with_sprite(shroom) and not shroom.is_hit: 
                             shroom.is_hit = True
-                            walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+                            walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                             self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
             
             
@@ -818,14 +869,14 @@ class MyGame(arcade.Window):
     
     def update_score(self, score):
         self.score += score
-        arcade.draw_text(str(score),
-                         self.mario.center_x + 20,
-                         self.mario.center_y + 20,
-                         arcade.color.WHITE,
-                         DEFAULT_FONT_SIZE,
-                         width=SCREEN_WIDTH,
-                         align="center",
-                         font_name="Kenney Pixel")
+        self.add_num = score
+        
+        
+    def is_sprite_on_screen(self, sprite):
+        if 0 <= sprite.center_x <= SCREEN_WIDTH and 0 <= sprite.center_y <= SCREEN_HEIGHT:
+            return True
+        else:
+            return False
 
     def nudge_blocks(self):
         # On every few frames, allow the nudged blocks to move
@@ -920,8 +971,6 @@ class MyGame(arcade.Window):
         self.mario.set_position(0, 2*SCREEN_HEIGHT)
         
         # Ideally, also reset the save file to a default version (save_0.json)
-        if self.lives == 0:
-            pass
         
         
         
