@@ -17,7 +17,7 @@ CHARACTER_SCALING = 2.5
 # Movement speed of enemy, in pixels per frame
 ENEMY_MOVEMENT_SPEED = 100
 
-class Enemy(arcade.AnimatedTimeBasedSprite):
+class Koopa(arcade.AnimatedTimeBasedSprite):
     def __init__(self, filename, **kwargs): #5.19 #original ===self, name_folder, name_file):
         super().__init__()
         self.change_x = ENEMY_MOVEMENT_SPEED
