@@ -573,10 +573,11 @@ class MyGame(arcade.Window):
             # he's below the screen
             self.frame_counter += 1
             
-            self.defeated.center_y += 20 - self.frame_counter           
-            
-            if self.defeated.center_y < -10:
-                self.setup()
+            if self.frame_counter > 20:
+                self.defeated.center_y += (40 - self.frame_counter) / 2           
+                
+                if self.defeated.center_y < -10:
+                    self.setup()
                 
             return # Early return
         
@@ -963,7 +964,7 @@ class MyGame(arcade.Window):
         # Make the player invisible
         self.mario.remove_from_sprite_lists()
         # Add the defeated mario to goombas (bit of a hack)
-        self.goomba_list.append(self.defeated)
+        self.coin_list.append(self.defeated)
         
         
         # Set the timer and position to be safe, so it is not called again
