@@ -156,7 +156,6 @@ class MyGame(arcade.Window):
         # background color
         arcade.set_background_color(arcade.color.BLACK)
 
-
         # background imags
         
         self.stagestart = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
@@ -178,6 +177,7 @@ class MyGame(arcade.Window):
         
         self.do_update = False
         self.stage_intro = True
+        self.is_defeated = False
         self.end_of_level = False
 
         # for level ending
@@ -330,6 +330,7 @@ class MyGame(arcade.Window):
         self.mario.center_x = 48
         self.mario.center_y = 48
         self.scene.add_sprite(LAYER_NAME_PLAYER, self.mario)
+        
         self.scene[LAYER_NAME_GOOMBA]
         self.scene[LAYER_NAME_KOOPA]
 
@@ -567,6 +568,18 @@ class MyGame(arcade.Window):
                 
             return # Early return
         
+        if self.is_defeated:
+            # Only want to shift the guy up and down, then call setup when
+            # he's below the screen
+            self.frame_counter += 1
+            
+            self.defeated.center_y += 20 - self.frame_counter           
+            
+            if self.defeated.center_y < -10:
+                self.setup()
+                
+            return # Early return
+        
         # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
@@ -582,7 +595,7 @@ class MyGame(arcade.Window):
             
             
             # Player dies if they fall below the world or run out of time
-            if self.mario.center_y < -SPRITE_PIXEL_SIZE:# or self.timer <= 0:
+            if self.mario.center_y < -SPRITE_PIXEL_SIZE or self.timer <= 0:
                 self.player_die()
             
             self.scene.update([LAYER_NAME_GOOMBA])
@@ -677,9 +690,6 @@ class MyGame(arcade.Window):
             self.height_multiplier = int(self.mario.power > 0) + 1
              
             # Proof of concept of hitting the above block:
-            # Testing with breakable blocks first
-
-            self.height_multiplier = int(self.mario.power > 0) + 1
 
             """---- this is for KOOPA mario collision -----
             if koopa jumped on turns into shell that mario can collect"""
@@ -748,6 +758,7 @@ class MyGame(arcade.Window):
                     enemy_position = goomba.position
                     goomba.remove_from_sprite_lists()
                     squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
+                    
                     squished.position = enemy_position
                     if self.mario.power == 0:
                         squished.center_y = self.mario.center_y - 50
@@ -929,6 +940,14 @@ class MyGame(arcade.Window):
         save_file.close()
         
     def player_die(self):
+        
+        # Can't die twice in a row
+        if self.is_defeated:
+            return
+        
+        self.frame_counter = 0
+        self.is_defeated = True
+        
         arcade.stop_sound(self.music_ref)
 
         if not self.end_of_level:
@@ -936,16 +955,27 @@ class MyGame(arcade.Window):
             arcade.stop_sound(self.music_ref)
             arcade.play_sound(self.death_sound)
         
+        
+        self.defeated = arcade.Sprite("resources/sprites/mario_defeated.png", CHARACTER_SCALING)
+        
+        self.defeated.position = self.mario.position
+        
+        # Make the player invisible
+        self.mario.remove_from_sprite_lists()
+        # Add the defeated mario to goombas (bit of a hack)
+        self.goomba_list.append(self.defeated)
+        
+        
         # Set the timer and position to be safe, so it is not called again
         self.timer = 10
         self.mario.set_position(0, 2*SCREEN_HEIGHT)
         
-        # For later, give a game over screen if lives reduced to zero (>0 can be infinite)
         # Ideally, also reset the save file to a default version (save_0.json)
         
         
+        
         # Reset the stage
-        self.setup()
+        #self.setup()
 
 
 def main():
