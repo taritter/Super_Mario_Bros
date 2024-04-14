@@ -59,11 +59,6 @@ class Mushroom(arcade.Sprite):
         if self.out_of_box_y == 0:
             self.out_of_box_y = self.center_y + self.scale * TILE_HEIGHT
             self.prev_x = self.center_x
-        print(self.is_hit)
-        print(self.center_y)
-        print(self.out_of_box_y)
-        print(self.change_x)
-        print(self.boundary_right)
         if self.is_hit and self.in_box:
             self.change_y = self.scale * TILE_HEIGHT / 16
             if self.center_y >= self.out_of_box_y:
