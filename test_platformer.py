@@ -19,7 +19,7 @@ SCREEN_TITLE = "Platformer"
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
 DEFAULT_FONT_SIZE = 25
-INTRO_FRAME_COUNT = 150
+INTRO_FRAME_COUNT = 175
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 2.5
@@ -112,10 +112,18 @@ class MyGame(arcade.Window):
         self.coin_sound = arcade.load_sound("resources/sounds/smw_coin.wav")
 
         self.break_sound = arcade.load_sound("resources/sounds/Break.wav")
+
+        self.bump_sound = arcade.load_sound("resources/sounds/bump.wav")
         
         self.squish_sound = arcade.load_sound("resources/sounds/Squish.wav")
 
         self.powerup_sound = arcade.load_sound("resources/sounds/powerup.wav")
+
+        self.death_sound = arcade.load_sound("resources/sounds/death.wav")
+
+        self.clear_sound = arcade.load_sound("resources/sounds/clear.wav")
+
+        self.music = arcade.load_sound("resources/sounds/music.wav")
 
         self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
         
@@ -162,7 +170,8 @@ class MyGame(arcade.Window):
         
         self.do_update = False
         self.stage_intro = True
-        
+        self.end_of_level = False
+
         self.timer = 300
         self.frame_counter = 0
         
@@ -321,6 +330,8 @@ class MyGame(arcade.Window):
             self.mario, gravity_constant=GRAVITY, walls=walls, platforms=[self.goomba_list, self.koopa_list]
         )
         self.physics_engine_list = []
+
+        self.music_ref = arcade.play_sound(self.music, volume=0.5)
         
         self.success_map = False
 
@@ -654,6 +665,7 @@ class MyGame(arcade.Window):
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
                     self.update_score(100)
+                    arcade.play_sound(self.squish_sound)
                     enemy_position = koopa.position
                     # creates a new enemy object with the shell instead
                     koopa.remove_from_sprite_lists()
@@ -734,6 +746,7 @@ class MyGame(arcade.Window):
                 else:
                     # This means Mario is small, bump the block!
                     self.nudged_blocks_list_set[4].append(block)
+                    arcade.play_sound(self.bump_sound)
                     # Play a sound (change to nudging sound)
                     # arcade.play_sound(self.coin_sound)
 
@@ -824,6 +837,13 @@ class MyGame(arcade.Window):
                 self.nudged_blocks_list_set = temp_nudged_blocks_list_set
     
     def flag_animation(self):
+        self.end_of_level = True
+
+        if arcade.Sound.is_playing(self.music_ref, self.music_ref):
+            arcade.stop_sound(self.music_ref)
+            arcade.play_sound(self.clear_sound)
+
+
         if self.mario.center_y > SPRITE_PIXEL_SIZE * TILE_SCALING * 4:
             self.mario.slidedown_flag()
         else:
@@ -858,7 +878,12 @@ class MyGame(arcade.Window):
         save_file.close()
         
     def player_die(self):
-        self.lives -= 1
+        arcade.stop_sound(self.music_ref)
+
+        if not self.end_of_level:
+            self.lives -= 1
+            arcade.stop_sound(self.music_ref)
+            arcade.play_sound(self.death_sound)
         
         # Set the timer and position to be safe, so it is not called again
         self.timer = 10
