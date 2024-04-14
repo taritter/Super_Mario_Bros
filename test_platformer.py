@@ -706,21 +706,14 @@ class MyGame(arcade.Window):
 
                     offset_distance = 30
                     if self.mario.change_x >= 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 40)
+                        k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 80)
                     elif self.mario.change_x < 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 40)
+                        k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
 
                     k_shell.change_x = 3
                     self.koopa_list.append(k_shell)
                     if k_shell in self.koopa_list:
                         new_sprite = True
-
-                    if self.mario.collides_with_sprite(k_shell):   
-                        print("collide with shell")
-                        self.mario.change_y = 3
-                        k_shell.remove_from_sprite_lists()
-                        self.update_score(100)
-
 
             """---- this is for GOOMBA collision ----
             if goomba is jumped on changes to squished image"""
@@ -734,6 +727,8 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                 for goomba in goomba_hit_list:
+                    self.update_score(100)
+                    arcade.play_sound(self.squish_sound)
                     # make a animation that displays score
                     enemy_position = goomba.position
                     goomba.remove_from_sprite_lists()
@@ -747,11 +742,6 @@ class MyGame(arcade.Window):
 
                     goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                     # does squished
-                    if squished in goomba_hit_list:
-                        arcade.play_sound(self.squish_sound)
-                        self.mario.change_y = 3
-                        squished.remove_from_sprite_lists()
-                        self.update_score(100)
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
