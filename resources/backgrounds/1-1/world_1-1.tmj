@@ -23,7 +23,7 @@
         {
          "draworder":"topdown",
          "id":13,
-         "name":"enemies",
+         "name":"goomba",
          "objects":[
                 {
                  "gid":925,
@@ -93,6 +93,11 @@
                          "value":2352
                         }, 
                         {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":2760
+                        }, 
+                        {
                          "name":"change_x",
                          "type":"int",
                          "value":-1
@@ -103,6 +108,235 @@
                  "width":16,
                  "x":1069,
                  "y":209
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":14,
+         "name":"koopa",
+         "objects":[
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":24,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":3562
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":5360
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1637,
+                 "y":209
+                }, 
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":25,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":3562
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":5360
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1663,
+                 "y":209
+                }, 
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":26,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":3562
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":5360
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":1689.5,
+                 "y":209
+                }, 
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":27,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":6595
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":7165
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2810.5,
+                 "y":208
+                }, 
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":28,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":6595
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":7165
+                        }, 
+                        {
+                         "name":"change_x",
+                         "type":"int",
+                         "value":-1
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2832,
+                 "y":208
+                }, 
+                {
+                 "gid":1769,
+                 "height":32,
+                 "id":33,
+                 "name":"",
+                 "properties":[
+                        {
+                         "name":"boundary_left",
+                         "type":"int",
+                         "value":720
+                        }, 
+                        {
+                         "name":"boundary_right",
+                         "type":"int",
+                         "value":1127
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":363,
+                 "y":208
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":15,
+         "name":"Teleport",
+         "objects":[
+                {
+                 "height":13,
+                 "id":29,
+                 "name":"p1enterdown",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":371.5,
+                 "y":328.5
+                }, 
+                {
+                 "height":13,
+                 "id":30,
+                 "name":"p1leavebottom",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":3114.5,
+                 "y":208.5
+                }, 
+                {
+                 "height":26,
+                 "id":31,
+                 "name":"p2enterright",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":12,
+                 "x":3292.5,
+                 "y":362.5
+                }, 
+                {
+                 "height":13,
+                 "id":32,
+                 "name":"p2leavetop",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":16,
+                 "x":2067.5,
+                 "y":360.5
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -344,8 +578,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":14,
- "nextobjectid":23,
+ "nextlayerid":16,
+ "nextobjectid":34,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.10.2",
@@ -358,6 +592,14 @@
         {
          "firstgid":925,
          "source":"..\/..\/sprites\/goomba_move.tsx"
+        }, 
+        {
+         "firstgid":928,
+         "source":"..\/..\/sprites\/enemy_sprite_sheet.tsx"
+        }, 
+        {
+         "firstgid":1765,
+         "source":"..\/..\/sprites\/koopa_move.tsx"
         }],
  "tilewidth":16,
  "type":"map",
