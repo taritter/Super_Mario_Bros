@@ -93,6 +93,8 @@ class MyGame(arcade.Window):
 
         self.mario_flag_bottom = False
 
+        self.last_level = False
+
         # Our physics engine
         self.physics_engine = None
 
@@ -115,8 +117,9 @@ class MyGame(arcade.Window):
 
         self.powerup_sound = arcade.load_sound("resources/sounds/powerup.wav")
 
-
         self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
+        
+
         # A Camera that can be used for scrolling the screen
         self.camera = None
 
@@ -138,8 +141,15 @@ class MyGame(arcade.Window):
 
         # background color
         arcade.set_background_color(arcade.color.BLACK)
+
+
+        # background imags
         
         self.stagestart = arcade.load_texture("resources/backgrounds/supermariostagestart.png")
+
+        self.quest_over = arcade.load_texture("resources/backgrounds/quest_over.png")
+
+        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
 
         
 
@@ -545,6 +555,9 @@ class MyGame(arcade.Window):
                 engine.update()
                 
 
+            if self.stage_num == 3:
+                self.last_level = True
+
             # Update Animations
             if not self.mario_flag:
 
@@ -572,28 +585,35 @@ class MyGame(arcade.Window):
 
             # if get to flagpole
             if arcade.check_for_collision_with_list(self.mario, self.flag_list):
-
-                # call animation method
-
                 self.mario_flag = True
 
             else:
 
                 self.mario_flag = False
 
+            # to slide down the flag
             if self.mario_flag and not self.mario_flag_bottom:
                 self.mario.slidedown_flag()
                 if arcade.check_for_collision_with_list(self.mario, self.flag_bottom_list):
+                    self.mario.texture = self.mario.slide_textures[1]
+                    self.mario.center_x = self.mario.center_x + SPRITE_PIXEL_SIZE
+                    time.sleep(0.5)
                     self.mario_door = True
                     self.mario_flag_bottom = True
 
+            # run to door
             if self.mario_door:
                 self.flag_animation()
 
             self.door_hit = arcade.check_for_collision_with_list(self.mario, self.door)
 
-            if self.door_hit:
+            if self.door_hit and not self.last_level:
                 self.mario.visible = False
+            else:
+                # show you win screen
+                arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.quest_over)
                 
             # See if the coin is hitting a platform
             coin_hit_list = arcade.check_for_collision_with_list(self.mario, self.coin_list)
@@ -669,7 +689,6 @@ class MyGame(arcade.Window):
                     goomba.remove_from_sprite_lists()
                     squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
                     squished.position = enemy_position
-                    print(self.mario.center_y)
                     squished.center_y = self.mario.center_y - 50
                     self.goomba_list.append(squished)
 
