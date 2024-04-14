@@ -37,8 +37,6 @@ PLAYER_START_Y = SPRITE_PIXEL_SIZE * TILE_SCALING * 2
 
 LAYER_NAME_PLATFORMS = "Platforms"
 LAYER_NAME_PLATFORMS_BREAKABLE = "Platform_Breakable"
-LAYER_NAME_PLATFORMS_COINS = "Platform_Coin"
-LAYER_NAME_PLATFORMS_ITEM = "Platform_Item"
 LAYER_NAME_MYSTERY_ITEM = "Mystery_Item"
 LAYER_NAME_MYSTERY_COIN = "Mystery_Coin"
 LAYER_NAME_COINS = "Coins"
@@ -84,16 +82,6 @@ class MyGame(arcade.Window):
 
         # Separate variable that holds the player sprite
         self.mario = None
-
-        # for level ending
-        
-        self.mario_door = False
-        
-        self.mario_flag = False
-
-        self.mario_flag_bottom = False
-
-        self.last_level = False
 
         # Our physics engine
         self.physics_engine = None
@@ -172,6 +160,18 @@ class MyGame(arcade.Window):
         self.stage_intro = True
         self.end_of_level = False
 
+        # for level ending
+        
+        self.mario_door = False
+        
+        self.mario_flag = False
+
+        self.mario_flag_bottom = False
+
+        self.last_level = False
+        
+        self.do_update = True
+
         self.timer = 300
         self.frame_counter = 0
         
@@ -187,8 +187,7 @@ class MyGame(arcade.Window):
         self.camera.move_to(player_centered)
         
     def setup_part_2(self):
-        
-        self.do_update = True
+
         # Initialize the set for handling when blocks are nudged
         self.nudged_blocks_list_set = ([],[],[],[],[])
                 
@@ -211,14 +210,6 @@ class MyGame(arcade.Window):
                 "hit_box_algorithm": "None",
             },
             LAYER_NAME_PLATFORMS_BREAKABLE: {
-                "use_spatial_hash": True,
-                "hit_box_algorithm": "None",
-            },
-            LAYER_NAME_PLATFORMS_COINS: {
-                "use_spatial_hash": True,
-                "hit_box_algorithm": "None",
-            },
-            LAYER_NAME_PLATFORMS_ITEM: {
                 "use_spatial_hash": True,
                 "hit_box_algorithm": "None",
             },
@@ -270,8 +261,6 @@ class MyGame(arcade.Window):
         # Set platforms
         self.platform_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS]
         self.platform_breakable_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_BREAKABLE]
-        self.platform_coin_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_COINS]
-        self.platform_item_list = self.tile_map.sprite_lists[LAYER_NAME_PLATFORMS_ITEM]
         self.mystery_item_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_ITEM]
         self.mystery_coin_list = self.tile_map.sprite_lists[LAYER_NAME_MYSTERY_COIN]
         
@@ -325,7 +314,7 @@ class MyGame(arcade.Window):
 
         # --- Other stuff
         # Create the 'physics engine'
-        walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+        walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.mario, gravity_constant=GRAVITY, walls=walls, platforms=[self.goomba_list, self.koopa_list]
         )
@@ -780,7 +769,7 @@ class MyGame(arcade.Window):
                     for shroom in self.mushroom_list:
                         if box.collides_with_sprite(shroom) and not shroom.is_hit: 
                             shroom.is_hit = True
-                            walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
+                            walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                             self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
             
             
