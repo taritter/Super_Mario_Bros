@@ -972,7 +972,7 @@ class MyGame(arcade.Window):
         
         # Set the timer and position to be safe, so it is not called again
         self.timer = 10
-        self.mario.set_position(0, 2*SCREEN_HEIGHT)
+        self.mario.set_position(0, -2*SCREEN_HEIGHT)
         
         # Ideally, also reset the save file to a default version (save_0.json)
         
