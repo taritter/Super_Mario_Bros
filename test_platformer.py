@@ -296,7 +296,7 @@ class MyGame(arcade.Window):
         # Create the 'physics engine'
         walls = [self.platform_list, self.platform_breakable_list, self.platform_item_list, self.mystery_item_list, self.mystery_coin_list]
         self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=self.scene[LAYER_NAME_GOOMBA], enemies=self.scene[LAYER_NAME_KOOPA]
+            self.mario, gravity_constant=GRAVITY, walls=walls, platforms=[self.goomba_list, self.koopa_list]
         )
         
         self.success_map = False
