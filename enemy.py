@@ -35,6 +35,10 @@ class Koopa(arcade.AnimatedTimeBasedSprite):
             self.shell = arcade.load_texture(filename)
             self.shell_frame = [arcade.AnimationKeyframe(0, 200, self.shell)]
 
+        # Set initial texture
+        self.texture = self.l_texture1
+        self.hit_box = self.texture.hit_box_points
+
     
     def update_animation(self, delta_time: float = 1/60):
         if self.change_x < 0 and not self.hit:

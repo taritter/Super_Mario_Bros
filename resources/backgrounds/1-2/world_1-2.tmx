@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="164" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="20" nextobjectid="9">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="164" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="21" nextobjectid="10">
  <editorsettings>
   <export target="world_1-2.tmj" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../tileset.tsx"/>
  <tileset firstgid="925" source="../../sprites/goomba_move.tsx"/>
  <tileset firstgid="928" source="../../sprites/koopa_move.tsx"/>
+ <tileset firstgid="934" source="../../sprites/mushroom.tsx"/>
  <imagelayer id="12" name="Background">
   <image source="blank_world_1-2.png" width="2624" height="240"/>
  </imagelayer>
@@ -14,6 +15,9 @@
   <object id="16" name="p1leavebottom" x="2512" y="272" width="16" height="13"/>
   <object id="17" name="p2enterright" x="2464" y="272" width="12" height="26"/>
   <object id="18" name="p2leavetop" x="2592" y="272" width="16" height="13"/>
+ </objectgroup>
+ <objectgroup id="20" name="Mushroom">
+  <object id="9" gid="934" x="944" y="176" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="18" name="Koopa">
   <object id="5" gid="932" x="1768.67" y="112.333" width="16" height="32">
