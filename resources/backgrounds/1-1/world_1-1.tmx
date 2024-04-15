@@ -204,6 +204,7 @@
   </object>
   <object id="36" gid="925" x="1282.5" y="80" width="16" height="16">
    <properties>
+    <property name="boundary_left" type="int" value="3200"/>
     <property name="boundary_right" type="int" value="3520"/>
     <property name="change_x" type="int" value="-1"/>
    </properties>

@@ -99,7 +99,11 @@ class MyGame(arcade.Window):
 
         self.quest_bool = False
 
-        self.current_time = []
+        self.no_lives = False
+
+        self.squish_counter = 0
+
+        self.shell_hit = 0
 
         self.add_num = 0
 
@@ -138,8 +142,6 @@ class MyGame(arcade.Window):
         self.pipe_sound = arcade.load_sound("resources/sounds/pipe.wav")
 
         self.music = arcade.load_sound("resources/sounds/music.wav")
-
-        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
         
 
         # A Camera that can be used for scrolling the screen
@@ -175,7 +177,6 @@ class MyGame(arcade.Window):
 
         self.game_over = arcade.load_texture("resources/backgrounds/game_over.png")
 
-        
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -384,17 +385,6 @@ class MyGame(arcade.Window):
                              font_name="Kenney Pixel")
             
             return
-
-        if self.timer <= 0:
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.timeUp)
-            
-        if self.lives <= 0:
-            # no more lives
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.game_over)
         
         
         # Draw our Scene
@@ -402,6 +392,17 @@ class MyGame(arcade.Window):
         self.scene.draw(pixelated=True)
         # Draw the player
         self.mario.draw(pixelated=True)
+
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.timeUp)
+            
+        if self.no_lives:
+            # no more lives
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.game_over)
         
         self.draw_text()
         
@@ -419,21 +420,19 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        
         if self.add_to_score:
             self.frame_counter += 1
             arcade.draw_text(str(self.add_num),
-                         self.mario.center_x - 20,
+                         self.mario.center_x - 275,
                          self.mario.center_y,
                          arcade.color.WHITE,
-                         DEFAULT_FONT_SIZE,
+                         20,
                          width=SCREEN_WIDTH,
                          align="center",
                          font_name="Kenney Pixel")
             if self.frame_counter > SCORE_FRAME_COUNT:
                 self.add_to_score = False
-                self.frame_counter = 0
-        
+                self.frame_counter = 0        
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -607,7 +606,7 @@ class MyGame(arcade.Window):
             
             
             self.frame_counter += 1
-            if self.frame_counter > 20:
+            if self.frame_counter > 30:
                 self.timer -= 1
                 self.frame_counter = 0
             
@@ -628,8 +627,11 @@ class MyGame(arcade.Window):
                 engine.update()
                 
 
-            if self.stage_num == 3:
+            if self.stage_num == 2:
                 self.last_level = True
+
+            if self.lives <= 0:
+                self.no_lives = True
 
             # Update Animations
             if not self.mario_flag:
@@ -727,7 +729,8 @@ class MyGame(arcade.Window):
                         self.frame_counter = 0
                         self.update_score(100)
                         arcade.play_sound(self.squish_sound)
-                        enemy_position = koopa.position
+                        enemy_y = koopa.center_y
+                        #print(enemy_y)
                         # creates a new enemy object with the shell instead
                         koopa.remove_from_sprite_lists()
                         k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
@@ -736,9 +739,9 @@ class MyGame(arcade.Window):
 
                         offset_distance = 30
                         if self.mario.change_x >= 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 80)
+                            k_shell.position = (self.mario.center_x + offset_distance, enemy_y - 20)
                         elif self.mario.change_x < 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
+                            k_shell.position = (self.mario.center_x - offset_distance, enemy_y - 20)
 
                         k_shell.change_x = 3
                         self.koopa_list.append(k_shell)
@@ -748,14 +751,14 @@ class MyGame(arcade.Window):
                             self.mario.change_y = 3
                             k_shell.remove_from_sprite_lists()
                         # Check for collision with other koopas in the list
-                        for koopa in self.koopa_list:
-                            if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
+                        for k in self.koopa_list:
+                            if k_shell.collides_with_sprite(k) and k_shell != k:
                                 print("collision with koopa")
                                 koopa.remove_from_sprite_lists()
                         for goomba in self.goomba_list:
                             if k_shell.collides_with_sprite(goomba):
-                                goomba.change_y = -1
-                                goomba.remove_from_sprite_lists()
+                                goomba.change_y = -3
+                                #goomba.remove_from_sprite_lists()
 
             
 
@@ -772,33 +775,27 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                 if self.mario.can_take_damage:
-                  for goomba in goomba_hit_list:
-                      walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
-                      self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
-                      self.update_score(100)
-                      arcade.play_sound(self.squish_sound)
-                      # make a animation that displays score
-                      enemy_position = goomba.position
-                      goomba.remove_from_sprite_lists()
-                      squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
-
-                      squished.position = enemy_position
-                      if self.mario.power == 0 and not is_squished:
-                          squished.center_y = self.mario.center_y - 50
-                          self.goomba_list.append(squished)
-                      elif self.mario.power == 1 and not is_squished:
-                          squished.center_y = self.mario.center_y - 70
-                          self.goomba_list.append(squished)
-                      elif is_squished:
-                          squished.remove_from_sprite_lists()
-
-
-                      self.frame_counter = 0
-                      self.frame_counter += 1
-
-                      if self.frame_counter > 10:
-                          is_squished = True
+                    for goomba in goomba_hit_list:
+                        walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
+                        self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
+                        self.update_score(100)
+                        arcade.play_sound(self.squish_sound)
+                        # make a animation that displays score
+                        enemy_position = goomba.position
+                        goomba.remove_from_sprite_lists()
+                        squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
                         
+                        squished.position = enemy_position
+                        if self.mario.power == 0 and not is_squished:
+                            squished.center_y = self.mario.center_y - 50
+                            self.goomba_list.append(squished)
+                        elif self.mario.power == 1 and not is_squished:
+                            squished.center_y = self.mario.center_y - 70
+                            self.goomba_list.append(squished)
+                        self.squish_counter += 1
+                        if self.squish_counter >= 2:
+                            squished.remove_from_sprite_lists()
+                            self.squish_counter = 0
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
@@ -935,6 +932,7 @@ class MyGame(arcade.Window):
     
     def flag_animation(self):
         self.end_of_level = True
+        self.update_score(500)
 
         if arcade.Sound.is_playing(self.music_ref, self.music_ref):
             arcade.stop_sound(self.music_ref)
@@ -948,9 +946,12 @@ class MyGame(arcade.Window):
                 self.mario.walk_to_door()
             else:
                 self.mario_door = False
-                self.stage_num += 1
-                self.next_world()
-                self.setup_part_2()
+                if self.stage_num == 2:
+                    self.quest_over = True
+                else:
+                    self.stage_num += 1
+                    self.next_world()
+                    self.setup_part_2()
     
 
 
