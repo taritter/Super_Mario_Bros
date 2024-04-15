@@ -735,22 +735,22 @@ class MyGame(arcade.Window):
                         elif self.mario.change_x < 0 and not new_sprite:
                             k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
 
-                    k_shell.change_x = 3
-                    self.koopa_list.append(k_shell)
-                    if k_shell in self.koopa_list:
-                        new_sprite = True
-                    if self.mario.collides_with_sprite(k_shell):    
-                        self.mario.change_y = 3
-                        k_shell.remove_from_sprite_lists()
-                    # Check for collision with other koopas in the list
-                    for koopa in self.koopa_list:
-                        if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
-                            print("collision with koopa")
-                            koopa.remove_from_sprite_lists()
-                    for goomba in self.goomba_list:
-                        if k_shell.collides_with_sprite(goomba):
-                            goomba.change_y = -3
-                            #goomba.remove_from_sprite_lists()
+                        k_shell.change_x = 3
+                        self.koopa_list.append(k_shell)
+                        if k_shell in self.koopa_list:
+                            new_sprite = True
+                        if self.mario.collides_with_sprite(k_shell):    
+                            self.mario.change_y = 3
+                            k_shell.remove_from_sprite_lists()
+                        # Check for collision with other koopas in the list
+                        for koopa in self.koopa_list:
+                            if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
+                                print("collision with koopa")
+                                koopa.remove_from_sprite_lists()
+                        for goomba in self.goomba_list:
+                            if k_shell.collides_with_sprite(goomba):
+                                goomba.change_y = -3
+                                #goomba.remove_from_sprite_lists()
 
             
 
