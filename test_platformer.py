@@ -99,7 +99,9 @@ class MyGame(arcade.Window):
 
         self.quest_bool = False
 
-        self.current_time = []
+        self.no_lives = False
+
+        self.squish_counter = 0
 
         self.add_num = 0
 
@@ -134,8 +136,6 @@ class MyGame(arcade.Window):
         self.clear_sound = arcade.load_sound("resources/sounds/clear.wav")
 
         self.music = arcade.load_sound("resources/sounds/music.wav")
-
-        self.timeUp = arcade.load_texture("resources/backgrounds/timeupMario.png")
         
 
         # A Camera that can be used for scrolling the screen
@@ -171,7 +171,6 @@ class MyGame(arcade.Window):
 
         self.game_over = arcade.load_texture("resources/backgrounds/game_over.png")
 
-        
 
     def setup(self):
         """Set up the game here. Call this function to restart the game."""
@@ -386,7 +385,7 @@ class MyGame(arcade.Window):
                                                 SCREEN_WIDTH, SCREEN_HEIGHT,
                                                 self.timeUp)
             
-        if self.lives <= 0:
+        elif self.no_lives:
             # no more lives
             arcade.draw_lrwh_rectangle_textured(0, 0,
                                                 SCREEN_WIDTH, SCREEN_HEIGHT,
@@ -419,17 +418,16 @@ class MyGame(arcade.Window):
         if self.add_to_score:
             self.frame_counter += 1
             arcade.draw_text(str(self.add_num),
-                         self.mario.center_x - 20,
+                         self.mario.center_x - 275,
                          self.mario.center_y,
                          arcade.color.WHITE,
-                         DEFAULT_FONT_SIZE,
+                         20,
                          width=SCREEN_WIDTH,
                          align="center",
                          font_name="Kenney Pixel")
             if self.frame_counter > SCORE_FRAME_COUNT:
                 self.add_to_score = False
-                self.frame_counter = 0
-        
+                self.frame_counter = 0        
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed."""
@@ -603,7 +601,7 @@ class MyGame(arcade.Window):
             
             
             self.frame_counter += 1
-            if self.frame_counter > 20:
+            if self.frame_counter > 30:
                 self.timer -= 1
                 self.frame_counter = 0
             
@@ -626,6 +624,9 @@ class MyGame(arcade.Window):
 
             if self.stage_num == 3:
                 self.last_level = True
+
+            if self.lives <= 0:
+                self.no_lives = True
 
             # Update Animations
             if not self.mario_flag:
@@ -749,8 +750,8 @@ class MyGame(arcade.Window):
                             koopa.remove_from_sprite_lists()
                     for goomba in self.goomba_list:
                         if k_shell.collides_with_sprite(goomba):
-                            goomba.change_y = -1
-                            goomba.remove_from_sprite_lists()
+                            goomba.change_y = -3
+                            #goomba.remove_from_sprite_lists()
 
             
 
@@ -783,16 +784,10 @@ class MyGame(arcade.Window):
                     elif self.mario.power == 1 and not is_squished:
                         squished.center_y = self.mario.center_y - 70
                         self.goomba_list.append(squished)
-                    elif is_squished:
+                    self.squish_counter += 1
+                    if self.squish_counter >= 2:
                         squished.remove_from_sprite_lists()
-                    
-
-                    self.frame_counter = 0
-                    self.frame_counter += 1
-
-                    if self.frame_counter > 10:
-                        is_squished = True
-                        
+                        self.squish_counter = 0
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
