@@ -1,5 +1,5 @@
 import arcade 
-import test_platformer as main
+import super_mario as main
 import arcade.gui
 import json
 
