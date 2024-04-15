@@ -965,7 +965,7 @@ class MyGame(arcade.Window):
         self.defeated.position = self.mario.position
         
         # Make the player invisible
-        self.mario.remove_from_sprite_lists()
+        self.mario.visible = False
         # Add the defeated mario to goombas (bit of a hack)
         self.coin_list.append(self.defeated)
         
