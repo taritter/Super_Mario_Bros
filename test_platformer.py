@@ -809,6 +809,7 @@ class MyGame(arcade.Window):
                 if (mario_glist or mario_klist) and self.mario.power == 0:
                     self.player_die()
                 elif (mario_glist or mario_klist) and self.mario.power == 1:
+                    arcade.play_sound(self.pipe_sound)
                     self.mario.prev_power()
             
             # Note that the multiplier for getting either side of mario's head (0.7)
