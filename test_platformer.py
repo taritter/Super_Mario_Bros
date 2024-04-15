@@ -498,7 +498,6 @@ class MyGame(arcade.Window):
         for teleporter in self.teleport_enter_list:
             if direction in teleporter.name:
                 if direction in ["up","down"]:
-                    # TODO: fix vertical checks
                     # Need horizontal checks
                     right_of_pipe = self.mario.center_x > teleporter.shape[0][0] * TILE_SCALING
                     left_of_pipe = self.mario.center_x < teleporter.shape[2][0] * TILE_SCALING
@@ -537,7 +536,6 @@ class MyGame(arcade.Window):
                      
             
     def exit_pipe(self, teleport_id):
-        # TODO: refigure to set the camera so that mario is on the far left
         # Find output pipe position
         for teleporter_output in self.teleport_exit_list:
             # If the identifier characters are present, thats the pair
@@ -717,40 +715,41 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
-                    walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
-                    self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(koopa, gravity_constant=GRAVITY, walls=walls))
-                    self.frame_counter = 0
-                    self.update_score(100)
-                    arcade.play_sound(self.squish_sound)
-                    enemy_position = koopa.position
-                    # creates a new enemy object with the shell instead
-                    koopa.remove_from_sprite_lists()
-                    k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
-                    k_shell.boundary_left = koopa.boundary_left
-                    k_shell.boundary_right = koopa.boundary_right
+                   if self.mario.can_take_damage:
+                        walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
+                        self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(koopa, gravity_constant=GRAVITY, walls=walls))
+                        self.frame_counter = 0
+                        self.update_score(100)
+                        arcade.play_sound(self.squish_sound)
+                        enemy_position = koopa.position
+                        # creates a new enemy object with the shell instead
+                        koopa.remove_from_sprite_lists()
+                        k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
+                        k_shell.boundary_left = koopa.boundary_left
+                        k_shell.boundary_right = koopa.boundary_right
 
-                    offset_distance = 30
-                    if self.mario.change_x >= 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 80)
-                    elif self.mario.change_x < 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
+                        offset_distance = 30
+                        if self.mario.change_x >= 0 and not new_sprite:
+                            k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 80)
+                        elif self.mario.change_x < 0 and not new_sprite:
+                            k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
 
-                    k_shell.change_x = 3
-                    self.koopa_list.append(k_shell)
-                    if k_shell in self.koopa_list:
-                        new_sprite = True
-                    if self.mario.collides_with_sprite(k_shell):    
-                        self.mario.change_y = 3
-                        k_shell.remove_from_sprite_lists()
-                    # Check for collision with other koopas in the list
-                    for koopa in self.koopa_list:
-                        if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
-                            print("collision with koopa")
-                            koopa.remove_from_sprite_lists()
-                    for goomba in self.goomba_list:
-                        if k_shell.collides_with_sprite(goomba):
-                            goomba.change_y = -1
-                            goomba.remove_from_sprite_lists()
+                        k_shell.change_x = 3
+                        self.koopa_list.append(k_shell)
+                        if k_shell in self.koopa_list:
+                            new_sprite = True
+                        if self.mario.collides_with_sprite(k_shell):    
+                            self.mario.change_y = 3
+                            k_shell.remove_from_sprite_lists()
+                        # Check for collision with other koopas in the list
+                        for koopa in self.koopa_list:
+                            if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
+                                print("collision with koopa")
+                                koopa.remove_from_sprite_lists()
+                        for goomba in self.goomba_list:
+                            if k_shell.collides_with_sprite(goomba):
+                                goomba.change_y = -1
+                                goomba.remove_from_sprite_lists()
 
             
 
@@ -766,32 +765,33 @@ class MyGame(arcade.Window):
                 is_squished = False
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
-                for goomba in goomba_hit_list:
-                    walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
-                    self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
-                    self.update_score(100)
-                    arcade.play_sound(self.squish_sound)
-                    # make a animation that displays score
-                    enemy_position = goomba.position
-                    goomba.remove_from_sprite_lists()
-                    squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
-                    
-                    squished.position = enemy_position
-                    if self.mario.power == 0 and not is_squished:
-                        squished.center_y = self.mario.center_y - 50
-                        self.goomba_list.append(squished)
-                    elif self.mario.power == 1 and not is_squished:
-                        squished.center_y = self.mario.center_y - 70
-                        self.goomba_list.append(squished)
-                    elif is_squished:
-                        squished.remove_from_sprite_lists()
-                    
+                if self.mario.can_take_damage:
+                  for goomba in goomba_hit_list:
+                      walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
+                      self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
+                      self.update_score(100)
+                      arcade.play_sound(self.squish_sound)
+                      # make a animation that displays score
+                      enemy_position = goomba.position
+                      goomba.remove_from_sprite_lists()
+                      squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
 
-                    self.frame_counter = 0
-                    self.frame_counter += 1
+                      squished.position = enemy_position
+                      if self.mario.power == 0 and not is_squished:
+                          squished.center_y = self.mario.center_y - 50
+                          self.goomba_list.append(squished)
+                      elif self.mario.power == 1 and not is_squished:
+                          squished.center_y = self.mario.center_y - 70
+                          self.goomba_list.append(squished)
+                      elif is_squished:
+                          squished.remove_from_sprite_lists()
 
-                    if self.frame_counter > 10:
-                        is_squished = True
+
+                      self.frame_counter = 0
+                      self.frame_counter += 1
+
+                      if self.frame_counter > 10:
+                          is_squished = True
                         
 
                         
@@ -799,8 +799,14 @@ class MyGame(arcade.Window):
             mario_glist = arcade.check_for_collision_with_list(self.mario, self.goomba_list) #change ot enemy_hit_list?
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
-            if mario_glist or mario_klist:
-                self.player_die()
+            if self.mario.can_take_damage:
+                print("Damage possible")
+                if (mario_glist or mario_klist) and self.mario.power == 0:
+                    self.player_die()
+                elif (mario_glist or mario_klist) and self.mario.power == 1:
+                    self.mario.prev_power()
+            else:
+                print("INVINCIBLE")
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
@@ -983,21 +989,15 @@ class MyGame(arcade.Window):
         self.defeated.position = self.mario.position
         
         # Make the player invisible
-        self.mario.remove_from_sprite_lists()
-        # Add the defeated mario to goombas (bit of a hack)
+        self.mario.visible = False
+        # Add the defeated mario to coins list (bit of a hack to cut down on number of lists)
         self.coin_list.append(self.defeated)
         
         
         # Set the timer and position to be safe, so it is not called again
         self.timer = 10
-        self.mario.set_position(0, 2*SCREEN_HEIGHT)
+        self.mario.set_position(0, -2*SCREEN_HEIGHT)
         
-        # Ideally, also reset the save file to a default version (save_0.json)
-        
-        
-        
-        # Reset the stage
-        #self.setup()
 
 
 def main():
