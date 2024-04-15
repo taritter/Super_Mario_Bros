@@ -133,9 +133,13 @@ class MyGame(arcade.Window):
 
         self.powerup_sound = arcade.load_sound("resources/sounds/powerup.wav")
 
+        self.powerup_appears_sound = arcade.load_sound("resources/sounds/powerup_appears.wav")
+
         self.death_sound = arcade.load_sound("resources/sounds/death.wav")
 
         self.clear_sound = arcade.load_sound("resources/sounds/clear.wav")
+
+        self.pipe_sound = arcade.load_sound("resources/sounds/pipe.wav")
 
         self.music = arcade.load_sound("resources/sounds/music.wav")
         
@@ -442,7 +446,7 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
-            if self.physics_engine.can_jump:
+            if self.physics_engine.can_jump():
                 arcade.play_sound(self.jump_sound, volume=0.05)
             self.enter_pipe("up")
             
@@ -512,6 +516,7 @@ class MyGame(arcade.Window):
                     
                     if right_of_pipe and left_of_pipe and in_pipe_vertical_zone:
                         # All conditions met, go throught the pipe
+                        arcade.play_sound(self.pipe_sound)
                         self.exit_pipe(teleporter.name[:2])
                         return
                  
@@ -530,6 +535,7 @@ class MyGame(arcade.Window):
                         left_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 < teleporter.shape[2][0] * TILE_SCALING
                      
                     if above_pipe and below_pipe and right_of_pipe and left_of_pipe:
+                        arcade.play_sound(self.pipe_sound)
                         self.exit_pipe(teleporter.name[:2])
                         return
                      
@@ -797,13 +803,11 @@ class MyGame(arcade.Window):
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
             if self.mario.can_take_damage:
-                #print("Damage possible")
                 if (mario_glist or mario_klist) and self.mario.power == 0:
                     self.player_die()
                 elif (mario_glist or mario_klist) and self.mario.power == 1:
+                    arcade.play_sound(self.pipe_sound)
                     self.mario.prev_power()
-            else:
-                print("INVINCIBLE")
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
@@ -850,7 +854,8 @@ class MyGame(arcade.Window):
                     self.coin_count += 1
                     block.is_hit = True
                     arcade.play_sound(self.coin_sound, volume = 2)
-
+                    self.nudged_blocks_list_set[4].append(block)
+                    
             # Get the block list for the left side of mario's head
             mystery_item_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_item_list)
             
@@ -863,14 +868,16 @@ class MyGame(arcade.Window):
             for box in mystery_item_hit_list:
                 if not box.is_hit:
                     box.is_hit = True
+                    self.nudged_blocks_list_set[4].append(box)
                     for shroom in self.mushroom_list:
                         if box.collides_with_sprite(shroom) and not shroom.is_hit: 
+                            arcade.play_sound(self.powerup_appears_sound, volume = 2)
                             shroom.is_hit = True
                             walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                             self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
             
             
-            # See if the mario collected a mushroom powerur
+            # See if the mario collected a mushroom powerup
             mushroom_hit_list = arcade.check_for_collision_with_list(self.mario, self.mushroom_list)
             
             for shroom in mushroom_hit_list:

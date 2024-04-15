@@ -282,7 +282,7 @@ class Mario(arcade.Sprite):
         
 
     def update_animation(self, delta_time: float = 1 / 60):
-        print(self.power)
+        
         # Update our counter
         self.update_counter += 1
 
