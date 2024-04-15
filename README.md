@@ -3,7 +3,9 @@
 ### Nathan Blanchard, Tess Ritter, Nick Bosley, Rachel Rose
 
 ## Description:
-This is a Python remake of the classic 1985 Super Mario Bros game. Traverse through three exciting levels filled with challenges, obstacles, and enemies!
+This is a Python remake of the classic 1985 Super Mario Bros game. Traverse through three exciting levels filled with challenges, obstacles, and enemies! 
+
+Run super_mario.py to play!
 
 ## Controls:
 - **A/D**: Move left/right
