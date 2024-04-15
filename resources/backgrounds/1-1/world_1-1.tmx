@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="41">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="243" height="15" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="42">
  <editorsettings>
-  <export format="tmx"/>
+  <export target="world_1-1.tmj" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="../tileset.tsx"/>
  <tileset firstgid="925" source="../../sprites/goomba_move.tsx"/>
@@ -19,6 +19,7 @@
  </objectgroup>
  <objectgroup id="17" name="Mushroom">
   <object id="37" gid="1771" x="352" y="160" width="16" height="16"/>
+  <object id="41" gid="1771" x="1744" y="96" width="16" height="16"/>
  </objectgroup>
  <layer id="9" name="Flag" width="243" height="15">
   <data encoding="csv">
