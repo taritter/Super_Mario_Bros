@@ -103,6 +103,8 @@ class MyGame(arcade.Window):
 
         self.squish_counter = 0
 
+        self.shell_hit = 0
+
         self.add_num = 0
 
         # Our physics engine
@@ -379,17 +381,6 @@ class MyGame(arcade.Window):
                              font_name="Kenney Pixel")
             
             return
-
-        if self.timer <= 0:
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.timeUp)
-            
-        elif self.no_lives:
-            # no more lives
-            arcade.draw_lrwh_rectangle_textured(0, 0,
-                                                SCREEN_WIDTH, SCREEN_HEIGHT,
-                                                self.game_over)
         
         
         # Draw our Scene
@@ -397,6 +388,17 @@ class MyGame(arcade.Window):
         self.scene.draw(pixelated=True)
         # Draw the player
         self.mario.draw(pixelated=True)
+
+        if self.timer <= 0:
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.timeUp)
+            
+        if self.no_lives:
+            # no more lives
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.game_over)
         
         self.draw_text()
         
@@ -414,18 +416,20 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        
+        text_x = self.mario.center_x - 275
+        text_y = self.mario.center_y
         if self.add_to_score:
             self.frame_counter += 1
             arcade.draw_text(str(self.add_num),
-                         self.mario.center_x - 275,
-                         self.mario.center_y,
+                         text_x,
+                         text_y,
                          arcade.color.WHITE,
                          20,
                          width=SCREEN_WIDTH,
                          align="center",
                          font_name="Kenney Pixel")
             if self.frame_counter > SCORE_FRAME_COUNT:
+                text_y += 5
                 self.add_to_score = False
                 self.frame_counter = 0        
 
@@ -620,7 +624,7 @@ class MyGame(arcade.Window):
                 engine.update()
                 
 
-            if self.stage_num == 3:
+            if self.stage_num == 2:
                 self.last_level = True
 
             if self.lives <= 0:
@@ -722,7 +726,8 @@ class MyGame(arcade.Window):
                         self.frame_counter = 0
                         self.update_score(100)
                         arcade.play_sound(self.squish_sound)
-                        enemy_position = koopa.position
+                        enemy_y = koopa.center_y
+                        #print(enemy_y)
                         # creates a new enemy object with the shell instead
                         koopa.remove_from_sprite_lists()
                         k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
@@ -731,9 +736,9 @@ class MyGame(arcade.Window):
 
                         offset_distance = 30
                         if self.mario.change_x >= 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 80)
+                            k_shell.position = (self.mario.center_x + offset_distance, enemy_y - 20)
                         elif self.mario.change_x < 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 80)
+                            k_shell.position = (self.mario.center_x - offset_distance, enemy_y - 20)
 
                         k_shell.change_x = 3
                         self.koopa_list.append(k_shell)
@@ -743,8 +748,8 @@ class MyGame(arcade.Window):
                             self.mario.change_y = 3
                             k_shell.remove_from_sprite_lists()
                         # Check for collision with other koopas in the list
-                        for koopa in self.koopa_list:
-                            if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
+                        for k in self.koopa_list:
+                            if k_shell.collides_with_sprite(k) and k_shell != k:
                                 print("collision with koopa")
                                 koopa.remove_from_sprite_lists()
                         for goomba in self.goomba_list:
@@ -795,7 +800,7 @@ class MyGame(arcade.Window):
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
             if self.mario.can_take_damage:
-                print("Damage possible")
+                #print("Damage possible")
                 if (mario_glist or mario_klist) and self.mario.power == 0:
                     self.player_die()
                 elif (mario_glist or mario_klist) and self.mario.power == 1:
@@ -923,6 +928,7 @@ class MyGame(arcade.Window):
     
     def flag_animation(self):
         self.end_of_level = True
+        self.update_score(500)
 
         if arcade.Sound.is_playing(self.music_ref, self.music_ref):
             arcade.stop_sound(self.music_ref)
@@ -936,9 +942,12 @@ class MyGame(arcade.Window):
                 self.mario.walk_to_door()
             else:
                 self.mario_door = False
-                self.stage_num += 1
-                self.next_world()
-                self.setup_part_2()
+                if self.stage_num == 2:
+                    self.quest_over = True
+                else:
+                    self.stage_num += 1
+                    self.next_world()
+                    self.setup_part_2()
     
 
 
