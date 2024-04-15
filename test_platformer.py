@@ -806,13 +806,10 @@ class MyGame(arcade.Window):
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
             if self.mario.can_take_damage:
-                print("Damage possible")
                 if (mario_glist or mario_klist) and self.mario.power == 0:
                     self.player_die()
                 elif (mario_glist or mario_klist) and self.mario.power == 1:
                     self.mario.prev_power()
-            else:
-                print("INVINCIBLE")
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to
