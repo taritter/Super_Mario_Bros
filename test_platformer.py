@@ -607,9 +607,10 @@ class MyGame(arcade.Window):
             # Pause for around 150 frames
             if self.frame_counter > INTRO_FRAME_COUNT:
                 self.stage_num = 0
+                self.stage = '1-1'
                 self.lives = 6
                 self.score = 0
-                self.coins = 0
+                self.coin_count = 0
                 self.player_die()
                 
             return # Early return
