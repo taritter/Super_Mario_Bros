@@ -129,9 +129,13 @@ class MyGame(arcade.Window):
 
         self.powerup_sound = arcade.load_sound("resources/sounds/powerup.wav")
 
+        self.powerup_appears_sound = arcade.load_sound("resources/sounds/powerup_appears.wav")
+
         self.death_sound = arcade.load_sound("resources/sounds/death.wav")
 
         self.clear_sound = arcade.load_sound("resources/sounds/clear.wav")
+
+        self.pipe_sound = arcade.load_sound("resources/sounds/pipe.wav")
 
         self.music = arcade.load_sound("resources/sounds/music.wav")
 
@@ -513,6 +517,7 @@ class MyGame(arcade.Window):
                     
                     if right_of_pipe and left_of_pipe and in_pipe_vertical_zone:
                         # All conditions met, go throught the pipe
+                        arcade.play_sound(self.pipe_sound)
                         self.exit_pipe(teleporter.name[:2])
                         return
                  
@@ -531,6 +536,7 @@ class MyGame(arcade.Window):
                         left_of_pipe = self.mario.center_x + SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 5 < teleporter.shape[2][0] * TILE_SCALING
                      
                     if above_pipe and below_pipe and right_of_pipe and left_of_pipe:
+                        arcade.play_sound(self.pipe_sound)
                         self.exit_pipe(teleporter.name[:2])
                         return
                      
@@ -870,6 +876,7 @@ class MyGame(arcade.Window):
                     self.nudged_blocks_list_set[4].append(box)
                     for shroom in self.mushroom_list:
                         if box.collides_with_sprite(shroom) and not shroom.is_hit: 
+                            arcade.play_sound(self.powerup_appears_sound, volume = 2)
                             shroom.is_hit = True
                             walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                             self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
