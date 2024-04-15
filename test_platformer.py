@@ -488,7 +488,6 @@ class MyGame(arcade.Window):
         for teleporter in self.teleport_enter_list:
             if direction in teleporter.name:
                 if direction in ["up","down"]:
-                    # TODO: fix vertical checks
                     # Need horizontal checks
                     right_of_pipe = self.mario.center_x > teleporter.shape[0][0] * TILE_SCALING
                     left_of_pipe = self.mario.center_x < teleporter.shape[2][0] * TILE_SCALING
@@ -527,7 +526,6 @@ class MyGame(arcade.Window):
                      
             
     def exit_pipe(self, teleport_id):
-        # TODO: refigure to set the camera so that mario is on the far left
         # Find output pipe position
         for teleporter_output in self.teleport_exit_list:
             # If the identifier characters are present, thats the pair
@@ -966,7 +964,7 @@ class MyGame(arcade.Window):
         
         # Make the player invisible
         self.mario.visible = False
-        # Add the defeated mario to goombas (bit of a hack)
+        # Add the defeated mario to coins list (bit of a hack to cut down on number of lists)
         self.coin_list.append(self.defeated)
         
         
@@ -974,12 +972,6 @@ class MyGame(arcade.Window):
         self.timer = 10
         self.mario.set_position(0, -2*SCREEN_HEIGHT)
         
-        # Ideally, also reset the save file to a default version (save_0.json)
-        
-        
-        
-        # Reset the stage
-        #self.setup()
 
 
 def main():
