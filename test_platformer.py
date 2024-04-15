@@ -706,39 +706,40 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
-                    self.update_score(100)
-                    arcade.play_sound(self.squish_sound)
-                    enemy_position = koopa.position
-                    # creates a new enemy object with the shell instead
-                    koopa.remove_from_sprite_lists()
-                    k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
-                    k_shell.position = enemy_position
-                    k_shell.boundary_left = koopa.boundary_left
-                    k_shell.boundary_right = koopa.boundary_right
-
-                    offset_distance = 30  # Adjust this value as needed
-                    if self.mario.change_x >= 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 40)
-                    elif self.mario.change_x < 0 and not new_sprite:
-                        k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 40)
-
-                    k_shell.change_x = 3
-                    self.koopa_list.append(k_shell)
-                    if k_shell in self.koopa_list:
-                        new_sprite = True
-
-                    if new_sprite:
+                    if self.mario.can_take_damage:
                         self.update_score(100)
-                    
-                    if self.mario.collides_with_sprite(k_shell) and self.mario.power == 0:    
-                        self.mario.change_y = 3
-                        k_shell.remove_from_sprite_lists()
-                    elif self.mario.collides_with_sprite(k_shell) and self.mario.power == 1 and self.grab_shell:
-                        k_shell.remove_from_sprite_lists()
-                    elif 0 <= k_shell.center_x <= SCREEN_WIDTH:
-                        k_shell.remove_from_sprite_lists()
-                    # elif not self.is_sprite_on_screen(k_shell):
-                    #     k_shell.remove_from_sprite_lists()
+                        arcade.play_sound(self.squish_sound)
+                        enemy_position = koopa.position
+                        # creates a new enemy object with the shell instead
+                        koopa.remove_from_sprite_lists()
+                        k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
+                        k_shell.position = enemy_position
+                        k_shell.boundary_left = koopa.boundary_left
+                        k_shell.boundary_right = koopa.boundary_right
+
+                        offset_distance = 30  # Adjust this value as needed
+                        if self.mario.change_x >= 0 and not new_sprite:
+                            k_shell.position = (self.mario.center_x + offset_distance, self.mario.center_y - 40)
+                        elif self.mario.change_x < 0 and not new_sprite:
+                            k_shell.position = (self.mario.center_x - offset_distance, self.mario.center_y - 40)
+
+                        k_shell.change_x = 3
+                        self.koopa_list.append(k_shell)
+                        if k_shell in self.koopa_list:
+                            new_sprite = True
+
+                        if new_sprite:
+                            self.update_score(100)
+                        
+                        if self.mario.collides_with_sprite(k_shell) and self.mario.power == 0:    
+                            self.mario.change_y = 3
+                            k_shell.remove_from_sprite_lists()
+                        elif self.mario.collides_with_sprite(k_shell) and self.mario.power == 1 and self.grab_shell:
+                            k_shell.remove_from_sprite_lists()
+                        elif 0 <= k_shell.center_x <= SCREEN_WIDTH:
+                            k_shell.remove_from_sprite_lists()
+                        # elif not self.is_sprite_on_screen(k_shell):
+                        #     k_shell.remove_from_sprite_lists()
 
 
             """---- this is for GOOMBA collision ----
@@ -753,35 +754,42 @@ class MyGame(arcade.Window):
                 is_squished = False
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
-                for goomba in goomba_hit_list:
-                    # make a animation that displays score
-                    self.update_score(100)
-                    arcade.play_sound(self.squish_sound)
-                    enemy_position = goomba.position
-                    goomba.remove_from_sprite_lists()
-                    squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
-                    
-                    squished.position = enemy_position
-                    if self.mario.power == 0:
-                        squished.center_y = self.mario.center_y - 50
-                    else:
-                        squished.center_y = self.mario.center_y - 70
-                    self.goomba_list.append(squished)
+                if self.mario.can_take_damage:
+                    for goomba in goomba_hit_list:
+                        # make a animation that displays score
+                        self.update_score(100)
+                        arcade.play_sound(self.squish_sound)
+                        enemy_position = goomba.position
+                        goomba.remove_from_sprite_lists()
+                        squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
+                        
+                        squished.position = enemy_position
+                        if self.mario.power == 0:
+                            squished.center_y = self.mario.center_y - 50
+                        else:
+                            squished.center_y = self.mario.center_y - 70
+                        self.goomba_list.append(squished)
 
-                    goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
-                    # does squished
-                    if squished in goomba_hit_list and not is_squished:
-                        self.mario.change_y = 3
-                        squished.remove_from_sprite_lists()
-                        is_squished = True
+                        goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
+                        # does squished
+                        if squished in goomba_hit_list and not is_squished:
+                            self.mario.change_y = 3
+                            squished.remove_from_sprite_lists()
+                            is_squished = True
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
             mario_glist = arcade.check_for_collision_with_list(self.mario, self.goomba_list) #change ot enemy_hit_list?
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
-            if mario_glist or mario_klist and self.mario.power == 0:
-                self.player_die()
+            if self.mario.can_take_damage:
+                print("Damage possible")
+                if (mario_glist or mario_klist) and self.mario.power == 0:
+                    self.player_die()
+                elif (mario_glist or mario_klist) and self.mario.power == 1:
+                    self.mario.prev_power()
+            else:
+                print("INVINCIBLE")
             
             # Note that the multiplier for getting either side of mario's head (0.7)
             # Is just barely smaller than it needs to be - it is possible to

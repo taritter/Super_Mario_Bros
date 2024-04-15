@@ -29,6 +29,9 @@ PLAYER_ACCELERATION = 0.2
 PLAYER_FRICTION = 0.35
 PLAYER_JUMP_SPEED = 18
 
+# Number of frames to be invincible for after taking damage
+IFRAMES = 25
+
 class Mario(arcade.Sprite):
     """Player Sprite"""
 
@@ -50,7 +53,10 @@ class Mario(arcade.Sprite):
         self.sliding = NOT_SLIDING
         self.power = SMALL
         self.is_growing = False
+        self.can_take_damage = True
 
+        # Used to keep track of invincibility frames
+        self.initial_frame = 0
 
         # --- Load Textures ---
 
@@ -148,6 +154,7 @@ class Mario(arcade.Sprite):
             self.height = self.grow_height
             # Set growing var to true
             self.is_growing = True
+            self.can_take_damage = False
 
     def powerup_animation(self):
         if self.power == LARGE:
@@ -275,7 +282,7 @@ class Mario(arcade.Sprite):
         
 
     def update_animation(self, delta_time: float = 1 / 60):
-        
+        print(self.power)
         # Update our counter
         self.update_counter += 1
 
@@ -319,4 +326,15 @@ class Mario(arcade.Sprite):
                 if self.cur_texture > 2:
                     self.cur_texture = 0
                 self.texture = self.walk_textures[self.cur_texture][self.character_face_direction]
+
+        if not self.can_take_damage:
+            if self.initial_frame == 0:
+                self.initial_frame = self.update_counter
+                return
+            if self.update_counter - self.initial_frame >= IFRAMES:
+                self.can_take_damage = True
+            
+        
+
+        
         
