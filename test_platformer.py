@@ -416,20 +416,17 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
-        text_x = self.mario.center_x - 275
-        text_y = self.mario.center_y
         if self.add_to_score:
             self.frame_counter += 1
             arcade.draw_text(str(self.add_num),
-                         text_x,
-                         text_y,
+                         self.mario.center_x - 275,
+                         self.mario.center_y,
                          arcade.color.WHITE,
                          20,
                          width=SCREEN_WIDTH,
                          align="center",
                          font_name="Kenney Pixel")
             if self.frame_counter > SCORE_FRAME_COUNT:
-                text_y += 5
                 self.add_to_score = False
                 self.frame_counter = 0        
 
