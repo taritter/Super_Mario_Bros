@@ -185,7 +185,6 @@ class MyGame(arcade.Window):
         # a new stage        
         self.save()
         
-        self.do_update = False
         self.stage_intro = True
         self.is_defeated = False
         self.end_of_level = False
@@ -202,9 +201,14 @@ class MyGame(arcade.Window):
         
         self.do_update = True
 
+        self.no_lives = False
+
         self.timer = 300
 
         self.frame_counter = 0
+        
+        if self.lives <= 0:
+            self.no_lives = True
         
         # Reset the 'center' of the screen to 0
         self.screen_center_x = 0
@@ -597,6 +601,19 @@ class MyGame(arcade.Window):
                 
             return # Early return
         
+        if self.no_lives:
+            self.frame_counter += 1
+            
+            # Pause for around 150 frames
+            if self.frame_counter > INTRO_FRAME_COUNT:
+                self.stage_num = 0
+                self.lives = 6
+                self.score = 0
+                self.coins = 0
+                self.player_die()
+                
+            return # Early return
+        
         # Make sure that we are supposed to be doing updates
         if self.do_update:
             """Movement and game logic"""
@@ -629,9 +646,6 @@ class MyGame(arcade.Window):
 
             if self.stage_num == 2:
                 self.last_level = True
-
-            if self.lives <= 0:
-                self.no_lives = True
 
             # Update Animations
             if not self.mario_flag:
