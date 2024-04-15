@@ -836,7 +836,8 @@ class MyGame(arcade.Window):
                     self.coin_count += 1
                     block.is_hit = True
                     arcade.play_sound(self.coin_sound, volume = 2)
-
+                    self.nudged_blocks_list_set[4].append(block)
+                    
             # Get the block list for the left side of mario's head
             mystery_item_hit_list = arcade.get_sprites_at_point((self.mario.center_x - 0.7 * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2, self.mario.center_y + self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 + 1), self.mystery_item_list)
             
@@ -849,6 +850,7 @@ class MyGame(arcade.Window):
             for box in mystery_item_hit_list:
                 if not box.is_hit:
                     box.is_hit = True
+                    self.nudged_blocks_list_set[4].append(box)
                     for shroom in self.mushroom_list:
                         if box.collides_with_sprite(shroom) and not shroom.is_hit: 
                             shroom.is_hit = True
@@ -856,7 +858,7 @@ class MyGame(arcade.Window):
                             self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(shroom, gravity_constant=GRAVITY, walls=walls))
             
             
-            # See if the mario collected a mushroom powerur
+            # See if the mario collected a mushroom powerup
             mushroom_hit_list = arcade.check_for_collision_with_list(self.mario, self.mushroom_list)
             
             for shroom in mushroom_hit_list:
