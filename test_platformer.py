@@ -407,6 +407,12 @@ class MyGame(arcade.Window):
             arcade.draw_lrwh_rectangle_textured(0, 0,
                                                 SCREEN_WIDTH, SCREEN_HEIGHT,
                                                 self.game_over)
+            
+        if self.quest_bool:
+            self.camera.move_to((0, 0))
+            arcade.draw_lrwh_rectangle_textured(0, 0,
+                                                SCREEN_WIDTH, SCREEN_HEIGHT,
+                                                self.quest_over)
         
         self.draw_text()
         
@@ -575,6 +581,21 @@ class MyGame(arcade.Window):
 
     def on_update(self, delta_time):
 
+        if self.quest_bool:
+            self.frame_counter += 1
+            
+            # Pause for around 150 frames
+            if self.frame_counter > INTRO_FRAME_COUNT * 3:
+                self.stage_num = 0
+                self.stage = '1-1'
+                self.lives = 6
+                self.score = 0
+                self.coin_count = 0
+                self.quest_bool = False
+                self.player_die()
+                
+            return # Early return
+
         # Only display the intro during the intro
         if self.stage_intro:
             self.frame_counter += 1
@@ -698,7 +719,7 @@ class MyGame(arcade.Window):
 
             if self.door_hit and not self.last_level:
                 self.mario.visible = False
-            elif not self.door_hit and self.last_level:
+            elif self.door_hit and self.last_level and self.mario_flag_bottom:
                 self.quest_bool = True
 
                 
@@ -738,6 +759,7 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
+                   self.mario.change_y = 5
                    if self.mario.can_take_damage:
                         walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                         self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(koopa, gravity_constant=GRAVITY, walls=walls))
@@ -747,33 +769,54 @@ class MyGame(arcade.Window):
                         enemy_y = koopa.center_y
                         #print(enemy_y)
                         # creates a new enemy object with the shell instead
-                        koopa.remove_from_sprite_lists()
-                        k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
-                        k_shell.boundary_left = koopa.boundary_left
-                        k_shell.boundary_right = koopa.boundary_right
-
-                        offset_distance = 30
-                        if self.mario.change_x >= 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x + offset_distance, enemy_y - 20)
-                        elif self.mario.change_x < 0 and not new_sprite:
-                            k_shell.position = (self.mario.center_x - offset_distance, enemy_y - 20)
+                        # Workaround to tell if this is a new shell
+                        k_shell = None
+                        if koopa.alpha != 254:
+                            koopa.remove_from_sprite_lists()
+                            k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
+                            k_shell.boundary_left = koopa.boundary_left
+                            k_shell.boundary_right = koopa.boundary_right
+                            offset_distance = 30
+                            if self.mario.change_x >= 0 and not new_sprite:
+                                k_shell.position = (self.mario.center_x + offset_distance, enemy_y - 20)
+                            elif self.mario.change_x < 0 and not new_sprite:
+                                k_shell.position = (self.mario.center_x - offset_distance, enemy_y - 20)
+                        else:
+                            koopa.remove_from_sprite_lists()
+                            k_shell = arcade.Sprite("resources/sprites/koopa_shell.png", CHARACTER_SCALING)
+                            k_shell.boundary_left = koopa.boundary_left
+                            k_shell.boundary_right = koopa.boundary_right
+                            offset_distance = 30
+                            if self.mario.change_x >= 0 and not new_sprite:
+                                k_shell.position = (self.mario.center_x + offset_distance, enemy_y)
+                            elif self.mario.change_x < 0 and not new_sprite:
+                                k_shell.position = (self.mario.center_x - offset_distance, enemy_y)
 
                         k_shell.change_x = 3
-                        self.koopa_list.append(k_shell)
+
+                        k_shell.alpha = 254
+
+                        if len(k_shell.sprite_lists) == 0:
+                            self.koopa_list.append(k_shell)
                         if k_shell in self.koopa_list:
                             new_sprite = True
                         if self.mario.collides_with_sprite(k_shell):    
                             self.mario.change_y = 3
                             k_shell.remove_from_sprite_lists()
-                        # Check for collision with other koopas in the list
-                        for k in self.koopa_list:
-                            if k_shell.collides_with_sprite(k) and k_shell != k:
-                                print("collision with koopa")
-                                koopa.remove_from_sprite_lists()
-                        for goomba in self.goomba_list:
-                            if k_shell.collides_with_sprite(goomba):
-                                goomba.change_y = -3
-                                #goomba.remove_from_sprite_lists()
+
+            # Check for shell collision with other enemies
+            for koopa in self.koopa_list:
+                for shell in self.koopa_list:
+                    if shell.alpha == 254:
+                        if shell.collides_with_sprite(koopa) and shell != koopa:
+                            koopa.change_y = -3
+                            koopa.change_x = 1
+                for goomba in self.goomba_list:
+                    if shell.alpha == 254:
+                        if shell.collides_with_sprite(goomba):
+                            goomba.change_y = -3
+                            goomba.change_x = 1
+                            #goomba.remove_from_sprite_lists()
 
             
 
@@ -791,6 +834,7 @@ class MyGame(arcade.Window):
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                 if self.mario.can_take_damage:
                     for goomba in goomba_hit_list:
+                        self.mario.change_y = 5
                         walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
                         self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
                         self.update_score(100)
@@ -811,6 +855,8 @@ class MyGame(arcade.Window):
                         if self.squish_counter >= 2:
                             squished.remove_from_sprite_lists()
                             self.squish_counter = 0
+                        if squished.center_y <= 80:
+                            squished.remove_from_sprite_lists()
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
@@ -962,7 +1008,7 @@ class MyGame(arcade.Window):
             else:
                 self.mario_door = False
                 if self.stage_num == 2:
-                    self.quest_over = True
+                    self.quest_bool = True
                 else:
                     self.stage_num += 1
                     self.next_world()
@@ -977,7 +1023,7 @@ class MyGame(arcade.Window):
         map_name = f"resources/backgrounds/{self.mario_world}/world_{self.mario_world}.tmx"
         self.success_map = True
         self.stage = self.mario_world
-        return map_name        
+        return map_name
         
     def save(self):
         save_file = open(self.save_path, "w")
