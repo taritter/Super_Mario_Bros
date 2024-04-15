@@ -20,6 +20,7 @@ SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 600
 DEFAULT_FONT_SIZE = 25
 INTRO_FRAME_COUNT = 175
+SCORE_FRAME_COUNT = 20
 
 # Constants used to scale our sprites from their original size
 CHARACTER_SCALING = 2.5
@@ -112,6 +113,8 @@ class MyGame(arcade.Window):
         self.goomba_list = []
 
         self.koopa_list = []
+
+        self.shell_list = []
         
         # -- sounds --
         self.jump_sound = arcade.load_sound("resources/sounds/jump_sound.wav")
@@ -388,15 +391,6 @@ class MyGame(arcade.Window):
             arcade.draw_lrwh_rectangle_textured(0, 0,
                                                 SCREEN_WIDTH, SCREEN_HEIGHT,
                                                 self.game_over)
-        if self.add_to_score:
-            arcade.draw_text(str(self.add_num),
-                         self.mario.center_x + 5,
-                         self.mario.center_y + 5,
-                         arcade.color.WHITE,
-                         DEFAULT_FONT_SIZE,
-                         width=SCREEN_WIDTH,
-                         align="center",
-                         font_name="Kenney Pixel")
         
         
         # Draw our Scene
@@ -421,6 +415,20 @@ class MyGame(arcade.Window):
                          width=SCREEN_WIDTH,
                          align="left",
                          font_name="Kenney Pixel")
+        
+        if self.add_to_score:
+            self.frame_counter += 1
+            arcade.draw_text(str(self.add_num),
+                         self.mario.center_x - 20,
+                         self.mario.center_y,
+                         arcade.color.WHITE,
+                         DEFAULT_FONT_SIZE,
+                         width=SCREEN_WIDTH,
+                         align="center",
+                         font_name="Kenney Pixel")
+            if self.frame_counter > SCORE_FRAME_COUNT:
+                self.add_to_score = False
+                self.frame_counter = 0
         
 
     def on_key_press(self, key, modifiers):
@@ -709,6 +717,9 @@ class MyGame(arcade.Window):
                 # Call get_sprites_at_point for each x-coordinate
                 koopa_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * KOOPA_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.koopa_list)
                 for koopa in koopa_hit_list:
+                    walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
+                    self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(koopa, gravity_constant=GRAVITY, walls=walls))
+                    self.frame_counter = 0
                     self.update_score(100)
                     arcade.play_sound(self.squish_sound)
                     enemy_position = koopa.position
@@ -728,6 +739,20 @@ class MyGame(arcade.Window):
                     self.koopa_list.append(k_shell)
                     if k_shell in self.koopa_list:
                         new_sprite = True
+                    if self.mario.collides_with_sprite(k_shell):    
+                        self.mario.change_y = 3
+                        k_shell.remove_from_sprite_lists()
+                    # Check for collision with other koopas in the list
+                    for koopa in self.koopa_list:
+                        if k_shell.collides_with_sprite(koopa) and k_shell != koopa:
+                            print("collision with koopa")
+                            koopa.remove_from_sprite_lists()
+                    for goomba in self.goomba_list:
+                        if k_shell.collides_with_sprite(goomba):
+                            goomba.change_y = -1
+                            goomba.remove_from_sprite_lists()
+
+            
 
             """---- this is for GOOMBA collision ----
             if goomba is jumped on changes to squished image"""
@@ -738,9 +763,12 @@ class MyGame(arcade.Window):
             
             # Iterate over each x-coordinate in the range
             for x in x_range:
+                is_squished = False
                 # Call get_sprites_at_point for each x-coordinate
                 goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
                 for goomba in goomba_hit_list:
+                    walls = [self.platform_list, self.platform_breakable_list, self.mystery_item_list, self.mystery_coin_list]
+                    self.physics_engine_list.append(arcade.PhysicsEnginePlatformer(goomba, gravity_constant=GRAVITY, walls=walls))
                     self.update_score(100)
                     arcade.play_sound(self.squish_sound)
                     # make a animation that displays score
@@ -749,14 +777,22 @@ class MyGame(arcade.Window):
                     squished = arcade.Sprite("resources/sprites/goomba_squish.png", CHARACTER_SCALING)
                     
                     squished.position = enemy_position
-                    if self.mario.power == 0:
+                    if self.mario.power == 0 and not is_squished:
                         squished.center_y = self.mario.center_y - 50
-                    elif self.mario.power == 1:
+                        self.goomba_list.append(squished)
+                    elif self.mario.power == 1 and not is_squished:
                         squished.center_y = self.mario.center_y - 70
-                    self.goomba_list.append(squished)
+                        self.goomba_list.append(squished)
+                    elif is_squished:
+                        squished.remove_from_sprite_lists()
+                    
 
-                    goomba_hit_list = arcade.get_sprites_at_point((x, self.mario.center_y - self.height_multiplier * SPRITE_PIXEL_SIZE * CHARACTER_SCALING / 2 - 2), self.goomba_list)
-                    # does squished
+                    self.frame_counter = 0
+                    self.frame_counter += 1
+
+                    if self.frame_counter > 10:
+                        is_squished = True
+                        
 
                         
             #mushroom kills mario- todo: fix this so jumping on top doesn't kill mario
@@ -764,7 +800,6 @@ class MyGame(arcade.Window):
             mario_klist = arcade.check_for_collision_with_list(self.mario, self.koopa_list)
             #check if there is anything in the list, if not, 
             if mario_glist or mario_klist:
-                print("die")
                 self.player_die()
             
             # Note that the multiplier for getting either side of mario's head (0.7)
@@ -856,6 +891,7 @@ class MyGame(arcade.Window):
     def update_score(self, score):
         self.score += score
         self.add_num = score
+        self.add_to_score = True
         
         
     def is_sprite_on_screen(self, sprite):
