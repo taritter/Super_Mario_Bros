@@ -1,6 +1,12 @@
 """
-Platformer Template
+The original super mario bros!
+
+CS 3050 - Software Engineering
+Final Project
+Nathan Blanchard, Tess Ritter, Nick Bosley, Rachel Rose
 """
+
+
 import arcade
 
 import time
