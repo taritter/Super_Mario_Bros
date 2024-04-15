@@ -443,7 +443,7 @@ class MyGame(arcade.Window):
             self.mario.update_movement(self.left_key_down, self.right_key_down, self.jump_key_down, self.sprint_key_down, self.physics_engine)
             # Prevents the user from double jumping
             self.jump_key_down = False
-            if self.physics_engine.can_jump:
+            if self.physics_engine.can_jump():
                 arcade.play_sound(self.jump_sound, volume=0.05)
             self.enter_pipe("up")
             
