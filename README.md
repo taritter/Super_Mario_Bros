@@ -2,6 +2,9 @@
 ### CS3050-Final-Project
 ### Nathan Blanchard, Tess Ritter, Nick Bosley, Rachel Rose
 
+# To view gameplay watch this video
+https://youtu.be/ig-R7FVtB9c 
+
 ## Description:
 This is a Python remake of the classic 1985 Super Mario Bros game. Traverse through three exciting levels filled with challenges, obstacles, and enemies! 
 
